@@ -1,0 +1,5 @@
+# Bazel dirs
+bazel-*
+
+# VS Code stuff
+.vscode/
