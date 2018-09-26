@@ -1,14 +1,37 @@
 # Common C++ compiler flags
 
-ASIO_COPTS = [
-    "-DASIO_STANDALONE",
-    "-DASIO_HAS_MOVE",
-    "-DASIO_HAS_STD_CHRONO",
-    "-DASIO_HAS_STD_SYSTEM_ERROR",
-]
+ASIO_COPTS = select({
+    "//:darwin": [
+        "-DASIO_STANDALONE",
+        "-DASIO_HAS_MOVE",
+        "-DASIO_HAS_STD_CHRONO",
+        "-DASIO_HAS_STD_SYSTEM_ERROR",
+    ],
 
-SUPPRESSED_WARNINGS = [
-    "-Wno-unused-local-typedef",
-]
+    "//:windows": [
+        "/DASIO_STANDALONE",
+        "/DASIO_HAS_MOVE",
+        "/DASIO_HAS_STD_CHRONO",
+        "/DASIO_HAS_STD_SYSTEM_ERROR",
+    ],
+})
 
-COPTS = ["-std=c++14",] + ASIO_COPTS + SUPPRESSED_WARNINGS
+SUPPRESSED_WARNINGS = select({
+    "//:darwin": [
+        "-Wno-unused-local-typedef",
+    ],
+
+    "//:windows": [],
+})
+
+CPP_FLAGS = select({
+    "//:darwin": [
+        "-std=c++14",
+    ],
+
+    "//:windows": [
+        "/std:c++14",
+    ]
+})
+
+COPTS = CPP_FLAGS + ASIO_COPTS + SUPPRESSED_WARNINGS

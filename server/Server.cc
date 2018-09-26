@@ -17,6 +17,8 @@
 
 #include "Server.h"
 
+#include <signal.h>
+
 #include <memory>
 #include <thread>
 #include <utility>
@@ -53,9 +55,18 @@ Server::Server(uint16_t port)
     , m_socket{m_io}
     , m_workers{}
 {
+    #if defined(SIGHUP)
     m_signals.add(SIGHUP);
+    #endif
+
+    #if defined(SIGTERM)
     m_signals.add(SIGTERM);
+    #endif
+
+    #if defined(SIGKILL)
     m_signals.add(SIGKILL);
+    #endif
+
     #if defined(SIGQUIT)
     m_signals.add(SIGQUIT);
     #endif
