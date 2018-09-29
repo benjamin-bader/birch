@@ -5,6 +5,9 @@ cc_library(
     srcs = ["Message.cc"],
     hdrs = ["Message.h"],
     copts = COPTS,
+    deps = [
+        "@asio//:asio",
+    ]
 )
 
 cc_library(

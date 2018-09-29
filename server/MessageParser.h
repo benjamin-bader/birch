@@ -19,6 +19,7 @@
 #define BIRCH_MESSAGEPARSER_H
 
 #include <array>
+#include <string>
 
 #include "Message.h"
 
@@ -43,6 +44,9 @@ private:
 
     ParseState Consume(Message& message, char input);
 
+    // Checks m_buffer to see if it contains a valid message prefix.
+    bool IsValidPrefix() const noexcept;
+
 private:
     enum {
         parseStateStart = 0,
@@ -63,7 +67,6 @@ private:
     } m_state {parseStateStart};
 
     std::string m_buffer {};
-    int m_numParams {0};
 };
 
 template <typename InputIter>

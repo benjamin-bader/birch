@@ -22,6 +22,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "asio.hpp"
+
 namespace birch {
 
 namespace {
@@ -102,18 +104,69 @@ inline constexpr bool IsPrefixChar(char c)
 {
     return IsLetter(c)
         || IsDigit(c)
+        || IsSpecial(c)
         || c == '!'
         || c == '.'
-        || c == '@';
+        || c == '@'
+        || c == '-'  // hostnames can contain dashes
+        || c == ':'; // IPv6 addresses have colons
 }
 
 inline constexpr bool IsParamStartChar(char c)
 {
-    return (c >= 0x3B && c <= 0xFF)
-        || (c >= 0x21 && c <= 0x39)
-        || (c >= 0x0E && c <= 0x1F)
-        || (c >= 0x0B && c <= 0x0C)
-        || (c >= 0x01 && c <= 0x09);
+    int i = static_cast<int>(c);
+    return (i >= 0x3B && i <= 0xFF)
+        || (i >= 0x21 && i <= 0x39)
+        || (i >= 0x0E && i <= 0x1F)
+        || (i >= 0x0B && i <= 0x0C)
+        || (i >= 0x01 && i <= 0x09);
+}
+
+bool IsValidHostname(const char* begin, const char* end) noexcept
+{
+    bool shortnameStart = true;
+
+    if (begin == nullptr || end == nullptr || begin >= end)
+    {
+        return false;
+    }
+
+    const char* cur = begin;
+    while (cur != end)
+    {
+        char c = *cur++;
+
+        if (c == '!' || c == '@')
+        {
+            return false; // not a servername!
+        }
+
+        if (IsLetter(c) || IsDigit(c) || (!shortnameStart && c == '-'))
+        {
+            shortnameStart = false;
+            continue;
+        }
+        else if (c == '.' && !shortnameStart)
+        {
+            shortnameStart = true;
+            continue;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return !shortnameStart;
+}
+
+bool IsInternetAddress(const char* c) noexcept
+{
+    // NOTE: Assumes that c is a null-terminated string!
+    // this function is NOT SAFE for general use!
+    asio::error_code ec;
+    asio::ip::make_address(c, ec);
+    return !ec;
 }
 
 } // anonymous namespace
@@ -122,7 +175,6 @@ void MessageParser::Reset()
 {
     m_state = parseStateStart;
     m_buffer.clear();
-    m_numParams = 0;
 }
 
 ParseState MessageParser::Consume(Message& message, char input)
@@ -131,6 +183,12 @@ ParseState MessageParser::Consume(Message& message, char input)
       std::cout << "-> " << #s << std::endl; \
       m_state = (s); \
     } while (0);
+
+    if (input == '\0')
+    {
+        // the null character is never permitted
+        return ParseState::Invalid;
+    }
 
     switch (m_state)
     {
@@ -167,6 +225,11 @@ ParseState MessageParser::Consume(Message& message, char input)
 
             if (input == ' ')
             {
+                if (!IsValidPrefix())
+                {
+                    return ParseState::Invalid;
+                }
+
                 NEXT(parseStateCommandNameOrNumber);
                 message.SetPrefix(std::move(m_buffer));
                 m_buffer.clear();
@@ -311,6 +374,116 @@ ParseState MessageParser::Consume(Message& message, char input)
     return ParseState::Invalid;
 
     #undef NEXT
+}
+
+bool MessageParser::IsValidPrefix() const noexcept
+{
+    // could be either servername or nick [ [! user] @ host].
+    // try servername first.
+
+    const char* begin = &m_buffer[0];
+    const char* end = begin + m_buffer.size();
+
+    // servername must be a hostname; if the whole buffer is a valid
+    // hostname, then we're fine
+    if (IsValidHostname(begin, end))
+    {
+        return true;
+    }
+
+    // not a servername; validate nickname/user/host.
+
+    enum {
+        vsNickname,
+        vsUser,
+        vsHost
+    } state = vsNickname;
+
+    size_t nickLen = 0;
+    size_t userLen = 0;
+    size_t hostLen = 0;
+
+    const char* hostStart = end;
+
+    auto cur = begin;
+    while (cur != end)
+    {
+        char c = *cur++;
+
+        switch (state)
+        {
+            case vsNickname:
+                if (IsLetter(c) || IsSpecial(c))
+                {
+                    ++nickLen;
+                }
+                else if (IsDigit(c) || c == '-')
+                {
+                    if (nickLen == 0)
+                    {
+                        return false;
+                    }
+                    ++nickLen;
+                }
+                else if (c == '!')
+                {
+                    state = vsUser;
+                }
+                else if (c == '@')
+                {
+                    hostStart = cur;
+                    state = vsHost;
+                }
+                else
+                {
+                    return false;
+                }
+                break;
+
+            case vsUser:
+                if (IsUserChar(c))
+                {
+                    ++userLen;
+                }
+                else if (c == '@')
+                {
+                    hostStart = cur;
+                    state = vsHost;
+                }
+                else
+                {
+                    return false;
+                }
+
+                break;
+
+            case vsHost:
+                // Could be a hostname, IPv4 addr, or IPv6 addr.
+                // Accept all the chars, and validate later.
+                if (IsLetter(c) || IsHex(c) || c == '.' || c == ':' || c == '-')
+                {
+                    ++hostLen;
+                }
+                else
+                {
+                    return false;
+                }
+
+                break;
+        }
+    }
+
+    if (nickLen < 1 || nickLen > 9)
+    {
+        return false;
+    }
+
+    if (hostStart == end)
+    {
+        return false;
+    }
+
+    return IsValidHostname(hostStart, end) || IsInternetAddress(hostStart);
 }
 
 } // birch
