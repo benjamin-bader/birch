@@ -403,6 +403,7 @@ bool MessageParser::IsValidPrefix() const noexcept
     size_t userLen = 0;
     size_t hostLen = 0;
 
+    const char* userStart = end;
     const char* hostStart = end;
 
     auto cur = begin;
@@ -427,6 +428,7 @@ bool MessageParser::IsValidPrefix() const noexcept
                 }
                 else if (c == '!')
                 {
+                    userStart = cur;
                     state = vsUser;
                 }
                 else if (c == '@')
@@ -473,12 +475,20 @@ bool MessageParser::IsValidPrefix() const noexcept
         }
     }
 
+    // Nicknames are always required.  Hosts are optional,
+    // unless there is also a username in which case the
+    // host is required, too.
     if (nickLen < 1 || nickLen > 9)
     {
         return false;
     }
 
     if (hostStart == end)
+    {
+        return userStart == end;
+    }
+
+    if (userStart != end && userLen == 0)
     {
         return false;
     }

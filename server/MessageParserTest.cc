@@ -71,6 +71,12 @@ TEST_F(ParserTest, PrefixCanBeHostname)
     EXPECT_EQ("birch.bendb.com", message.GetPrefix());
 }
 
+TEST_F(ParserTest, PrefixCanBeBareNickname)
+{
+    EXPECT_EQ(ParseState::Complete, Parse(":ben LIST\r\n"));
+    EXPECT_EQ(ParseState::Complete, Parse(":[]{}|`_\\^@foo LIST\r\n")); // special chars are legal
+}
+
 TEST_F(ParserTest, ParseNickAtHostname)
 {
     EXPECT_EQ(ParseState::Complete, Parse(":[]{}|`_\\^@bendb.com LIST\r\n")); // special characters are legal
@@ -107,6 +113,9 @@ TEST_F(ParserTest, ParseNickAndUserAtHostname)
 
     // A nick is still required when a userame is given
     EXPECT_EQ(ParseState::Invalid, Parse(":!notben@bendb.com LIST\r\n"));
+
+    // A host is mandatory if a username is given
+    EXPECT_EQ(ParseState::Invalid, Parse(":ben!notben LIST\r\n"));
 }
 
 TEST_F(ParserTest, PrefixCanBeIPv4)
