@@ -19,16 +19,19 @@
 
 #include <iostream>
 
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "tclap/CmdLine.h"
 
 int main(int argc, char** argv)
 {
+  auto console = spdlog::stdout_color_mt("console");
   try
   {
     TCLAP::CmdLine cmd("TODO: Make an IRC server", ' ', "0.1.0");
     cmd.parse(argc, argv);
 
-    std::cout << "Hello, you!" << std::endl;
+    console->info("Hello, you!");
   }
   catch (const TCLAP::ArgException& e)
   {

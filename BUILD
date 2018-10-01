@@ -18,6 +18,7 @@ cc_binary(
     deps = [
         "//server",
         "@tclap",
+        "@spdlog",
     ],
     copts = COPTS,
 )

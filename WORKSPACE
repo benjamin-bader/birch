@@ -46,3 +46,17 @@ new_http_archive(
     strip_prefix = "zlib-1.2.11",
     build_file = "third_party/zlib.BUILD",
 )
+
+new_git_repository(
+    name = "spdlog",
+    commit = "b6b9d835c588c35227410a9830e7a4586f90777a", # Version 1.1.0
+    remote = "https://github.com/gabime/spdlog",
+    build_file = "third_party/spdlog.BUILD",
+)
+
+new_git_repository(
+    name = "fmtlib",
+    commit = "3e75ad9822980e41bc591938f26548f24eb88907", # Version 5.2.1
+    remote = "https://github.com/fmtlib/fmt",
+    build_file = "third_party/fmtlib.BUILD",
+)
