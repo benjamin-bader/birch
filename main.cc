@@ -19,9 +19,22 @@
 
 #include <iostream>
 
+#include "tclap/CmdLine.h"
+
 int main(int argc, char** argv)
 {
-  std::cout << "Hello, you!" << std::endl;
-  //auto server = birch::MakeServer(1337);
+  try
+  {
+    TCLAP::CmdLine cmd("TODO: Make an IRC server", ' ', "0.1.0");
+    cmd.parse(argc, argv);
+
+    std::cout << "Hello, you!" << std::endl;
+  }
+  catch (const TCLAP::ArgException& e)
+  {
+    std::cerr << "oh no\n" << e.error() << std::endl;
+    return 1;
+  }
+
   return 0;
 }
