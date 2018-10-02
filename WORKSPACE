@@ -3,6 +3,12 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 git_repository(
+    name = "absl",
+    commit = "92e07e5590752d6b8e67f7f2f86c6286561e8cea",  # 2018-08-01
+    remote = "https://github.com/abseil/abseil-cpp"
+)
+
+git_repository(
     name = "boringssl",
     commit = "1c91287e05463520c75877af46b665880d11ab63",
     remote = "https://boringssl.googlesource.com/boringssl",
