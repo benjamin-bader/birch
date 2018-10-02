@@ -19,6 +19,7 @@ cc_binary(
         "//server",
         "@tclap",
         "@spdlog",
+        "@absl//absl/strings",
     ],
     copts = COPTS,
 )
