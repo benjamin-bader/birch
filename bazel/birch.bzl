@@ -8,6 +8,9 @@ def birch_copts(custom_opts = []):
   ]
 
   darwin_opts = posix_opts + [
+    # ASIO spuriously triggers this warning on macOS.
+    "-Wno-unused-local-typedef",
+
     # TCLAP apparently requires this to support int64_t
     "-DHAVE_LONG_LONG",
   ]
