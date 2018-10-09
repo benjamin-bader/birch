@@ -1,18 +1,6 @@
-config_setting (
-  name = "darwin",
-  constraint_values = [ "@bazel_tools//platforms:osx" ],
-  visibility = ["//visibility:public"],
-)
+load("//bazel:birch.bzl", "birch_cc_binary")
 
-config_setting (
-  name = "windows",
-  constraint_values = [ "@bazel_tools//platforms:windows" ],
-  visibility = ["//visibility:public"],
-)
-
-load('//:vars.bzl', 'COPTS')
-
-cc_binary(
+birch_cc_binary(
     name = "birch",
     srcs = ["main.cc"],
     deps = [
@@ -21,5 +9,4 @@ cc_binary(
         "@spdlog",
         "@absl//absl/strings",
     ],
-    copts = COPTS,
 )
