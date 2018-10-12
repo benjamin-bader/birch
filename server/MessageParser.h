@@ -38,6 +38,8 @@ public:
     template <typename InputIter>
     ParseState Parse(Message& message, InputIter& begin, InputIter end);
 
+    ParseState Parse(Message& message, const char** begin, const char* end);
+
     void Reset();
 
 private:

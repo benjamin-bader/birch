@@ -20,11 +20,15 @@
 
 #include <chrono>
 #include <cstdint>
+#include <memory>
+
+#include "asio.hpp"
 
 namespace birch {
 
 class IUser;
 class IChannel;
+class IConnection;
 
 enum class ClientType
 {
@@ -45,14 +49,27 @@ public:
     virtual uint64_t NumBytesReceived() const noexcept = 0;
 };
 
+class IConnectionCallbacks
+{
+    virtual ~IConnectionCallbacks() = default;
+
+    virtual void OnDataAvailable(const std::shared_ptr<IConnection>& conn) = 0;
+};
+
 class IConnection
 {
 public:
     virtual ~IConnection() = default;
 
-    virtual void OnConnected() = 0;
+    virtual void AddCallback(const std::shared_ptr<IConnectionCallbacks>& callback) = 0;
+};
 
+class IConnectionFactory
+{
+public:
+    virtual ~IConnectionFactory() = default;
 
+    virtual std::shared_ptr<IConnection> MakeConnection(asio::ip::tcp::socket&& socket) = 0;
 };
 
 }

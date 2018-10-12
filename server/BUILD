@@ -38,6 +38,9 @@ birch_cc_library(
     name = "connection",
     srcs = ["Connection.cc"],
     hdrs = ["Connection.h"],
+    deps = [
+        "@asio"
+    ],
 )
 
 birch_cc_library(
