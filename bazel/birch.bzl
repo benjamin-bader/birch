@@ -1,3 +1,5 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary", "cc_test")
+
 def birch_copts(custom_opts = []):
   msvc_opts = [
     "-std:c++14",
@@ -18,6 +20,7 @@ def birch_copts(custom_opts = []):
   return custom_opts + select({
     "//bazel:darwin": darwin_opts,
     "//bazel:windows": msvc_opts,
+    "//bazel:linux_x64": posix_opts,
   })
 
 def birch_linkopts(custom_linkopts):
@@ -45,7 +48,7 @@ def birch_cc_library(
   if copts == None:
     copts = []
 
-  native.cc_library(
+  cc_library(
     name = name,
     srcs = srcs,
     hdrs = hdrs,
@@ -74,9 +77,9 @@ def birch_cc_test(
     copts = []
 
   if "@gtest//:gtest_main" not in deps:
-    deps += ["@gtest//:gtest_main"]
+    deps.append("@gtest//:gtest_main")
 
-  native.cc_test(
+  cc_test(
     name = name,
     srcs = srcs,
     copts = birch_copts() + copts,
@@ -103,7 +106,7 @@ def birch_cc_binary(
   if copts == None:
     copts = []
 
-  native.cc_binary(
+  cc_binary(
     name = name,
     srcs = srcs,
     copts = birch_copts() + copts,
