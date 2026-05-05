@@ -2,28 +2,29 @@ package(default_visibility = ["//visibility:public"])
 
 config_setting(
     name = "linux_x64",
-    values = {
-        "cpu": "k8",
-    }
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
 )
 
 config_setting(
     name = "linux_x86",
-    values = {
-        "cpu": "piii",
-    }
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_32",
+    ],
 )
 
 config_setting(
     name = "darwin",
-    values = {
-        "cpu": "darwin",
-    },
+    constraint_values = ["@platforms//os:macos"],
 )
 
 config_setting(
     name = "windows",
-    values = {
-        "cpu": "x64_windows",
-    }
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
 )

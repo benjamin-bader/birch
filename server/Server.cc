@@ -41,7 +41,7 @@ public:
     virtual void ServeForever() override;
 
 private:
-    asio::io_service m_io;
+    asio::io_context m_io;
     asio::signal_set m_signals;
     tcp::acceptor m_acceptor;
     tcp::socket m_socket;

@@ -20,12 +20,14 @@
 
 namespace birch {
 
+// An IClientConnection is a connection from a client to this server.
 class IClientConnection
 {
 public:
     virtual ~IClientConnection() = default;
 };
 
+// An IServerConnection is a connection from this server to another server.
 class IServerConnection
 {
 public:

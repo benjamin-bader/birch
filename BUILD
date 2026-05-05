@@ -5,8 +5,8 @@ birch_cc_binary(
     srcs = ["main.cc"],
     deps = [
         "//server",
-        "@tclap",
-        "@spdlog",
-        "@absl//absl/strings",
+        "@tclap//:tclap",
+        "@spdlog//:spdlog",
+        "@abseil-cpp//absl/strings",
     ],
 )

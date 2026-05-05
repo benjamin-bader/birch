@@ -12,7 +12,7 @@ birch_cc_library(
     hdrs = ["MessageParser.h"],
     deps = [
         "message",
-        "@asio",
+        "@asio//:asio",
     ],
 )
 
@@ -56,7 +56,6 @@ birch_cc_library(
         "connection",
         "user",
         "@asio//:asio",
-        "@boringssl//:ssl",
     ],
     visibility = ["//visibility:public"],
 )

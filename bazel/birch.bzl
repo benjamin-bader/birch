@@ -2,11 +2,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary", "cc_test")
 
 def birch_copts(custom_opts = []):
   msvc_opts = [
-    "-std:c++14",
+    "-std:c++23",
   ]
 
   posix_opts = [
-    "-std=c++14",
+    "-std=c++23",
   ]
 
   darwin_opts = posix_opts + [
@@ -76,8 +76,8 @@ def birch_cc_test(
   if copts == None:
     copts = []
 
-  if "@gtest//:gtest_main" not in deps:
-    deps.append("@gtest//:gtest_main")
+  if "@googletest//:gtest_main" not in deps:
+    deps.append("@googletest//:gtest_main")
 
   cc_test(
     name = name,
