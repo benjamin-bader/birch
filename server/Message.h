@@ -18,6 +18,7 @@
 #ifndef BIRCH_MESSAGE_H
 #define BIRCH_MESSAGE_H
 
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,10 @@ namespace birch {
 
 class Message
 {
+    std::string m_prefix;
+    std::string m_command;
+    std::vector<std::string> m_params;
+
 public:
     Message() = default;
     Message(const Message&) = default;
@@ -45,12 +50,9 @@ public:
     const std::string& GetPrefix() const noexcept;
     const std::string& GetCommand() const noexcept;
     const std::vector<std::string>& GetParams() const noexcept;
-
-private:
-    std::string m_prefix;
-    std::string m_command;
-    std::vector<std::string> m_params;
 };
+
+std::ostream& operator<<(std::ostream& os, const Message& message);
 
 }
 

@@ -21,19 +21,25 @@
 
 #include <memory>
 #include <thread>
-#include <utility>
 #include <vector>
 
-#include <openssl/ssl.h>
-#include "asio/ssl.hpp"
-#include "asio.hpp"
+#include "absl/log/log.h"
+
+#include <asio/ssl.hpp>
+#include <asio.hpp>
 
 namespace birch {
 
 using tcp = asio::ip::tcp;
 
-class Server : public IServer
+class Server : public IServer, public std::enable_shared_from_this<Server>
 {
+    asio::io_context m_io;
+    asio::signal_set m_signals;
+    tcp::acceptor m_acceptor;
+    tcp::socket m_socket;
+    std::vector<std::thread> m_workers;
+
 public:
     Server(uint16_t port);
     virtual ~Server();
@@ -41,11 +47,7 @@ public:
     virtual void ServeForever() override;
 
 private:
-    asio::io_context m_io;
-    asio::signal_set m_signals;
-    tcp::acceptor m_acceptor;
-    tcp::socket m_socket;
-    std::vector<std::thread> m_workers;
+    void HandleSignal(int signal);
 };
 
 Server::Server(uint16_t port)
@@ -54,6 +56,15 @@ Server::Server(uint16_t port)
     , m_acceptor{m_io}
     , m_socket{m_io}
     , m_workers{}
+{
+}
+
+Server::~Server()
+{
+
+}
+
+void Server::ServeForever()
 {
     #if defined(SIGHUP)
     m_signals.add(SIGHUP);
@@ -71,29 +82,40 @@ Server::Server(uint16_t port)
     m_signals.add(SIGQUIT);
     #endif
 
-    m_signals.async_wait([this](asio::error_code ec, int sig)
+    auto self = shared_from_this();
+    m_signals.async_wait([self](asio::error_code /*ec*/, int sig)
     {
-        switch (sig)
+        if (!self)
         {
-
+            return;
         }
+
+        self->HandleSignal(sig);
     });
 
     unsigned int numCores = std::thread::hardware_concurrency();
+    if (numCores == 0)
+    {
+        numCores = 1;
+    }
+
     for (auto i = 0; i < numCores; ++i)
     {
+        m_workers.emplace_back([self]()
+        {
+            if (!self)
+            {
+                return;
+            }
 
+            self->m_io.run();
+        });
     }
-}
 
-Server::~Server()
-{
-
-}
-
-void Server::ServeForever()
-{
-
+    for (auto& worker : m_workers)
+    {
+        worker.join();
+    }
 }
 
 std::unique_ptr<IServer> MakeServer(const IServerConfig& config)
@@ -101,4 +123,29 @@ std::unique_ptr<IServer> MakeServer(const IServerConfig& config)
     return std::make_unique<Server>(config.GetPort());
 }
 
+void Server::HandleSignal(int signal)
+{
+    LOG(INFO) << "Received signal " << signal;
+
+    switch (signal)
+    {
+    case SIGHUP:
+        // TODO: Reload configuration rather than stopping
+        m_acceptor.close();
+        break;
+    case SIGTERM:
+        m_acceptor.close();
+        break;
+    case SIGKILL:
+        m_acceptor.close();
+        break;
+    case SIGQUIT:
+        m_acceptor.close();
+        break;
+    default:
+        LOG(WARNING) << "Received unknown signal " << signal;
+        break;
+    }
 }
+
+} // namespace birch

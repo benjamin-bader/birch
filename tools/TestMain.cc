@@ -1,6 +1,6 @@
 // birch - IRC daemon, built with Bazel
 //
-// Copyright (C) 2018 Benjamin Bader
+// Copyright (C) 2026 Benjamin Bader
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,34 +15,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_H
-#define BIRCH_SERVER_H
+#include "absl/debugging/failure_signal_handler.h"
+#include "absl/debugging/symbolize.h"
+#include "absl/log/log.h"
+#include "absl/log/initialize.h"
 
-#include <cstdint>
-#include <memory>
+#include "gtest/gtest.h"
 
-namespace birch {
-
-class IServerConfig
+int main(int argc, char** argv)
 {
-public:
-    virtual ~IServerConfig() = default;
+    absl::InitializeSymbolizer(argv[0]);
 
-    virtual unsigned int GetNumWorkers() const = 0;
-    virtual uint16_t GetPort() const = 0;
-    virtual uint16_t GetTlsPort() const = 0;
-};
+    absl::FailureSignalHandlerOptions options;
+    absl::InstallFailureSignalHandler(options);
 
-class IServer
-{
-public:
-    virtual ~IServer() = default;
+    absl::InitializeLog();
 
-    virtual void ServeForever() = 0;
-};
+    testing::InitGoogleTest(&argc, argv);
 
-std::unique_ptr<IServer> MakeServer(const IServerConfig& config);
-
+    return RUN_ALL_TESTS();
 }
-
-#endif // BIRCH_SERVER_H

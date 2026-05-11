@@ -1,6 +1,6 @@
 // birch - IRC daemon, built with Bazel
 //
-// Copyright (C) 2018 Benjamin Bader
+// Copyright (C) 2026 Benjamin Bader
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,34 +15,27 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_H
-#define BIRCH_SERVER_H
+#include "Dispatcher.h"
 
-#include <cstdint>
-#include <memory>
+#include "absl/log/log.h"
 
 namespace birch {
 
-class IServerConfig
+class Dispatcher : public IDispatcher
 {
 public:
-    virtual ~IServerConfig() = default;
-
-    virtual unsigned int GetNumWorkers() const = 0;
-    virtual uint16_t GetPort() const = 0;
-    virtual uint16_t GetTlsPort() const = 0;
+    void OnMessage(const IClientConnection& connection, const Message& message) override;
+    void OnMessage(const IServerConnection& connection, const Message& message) override;
 };
 
-class IServer
+void Dispatcher::OnMessage(const IClientConnection& connection, const Message& message)
 {
-public:
-    virtual ~IServer() = default;
-
-    virtual void ServeForever() = 0;
-};
-
-std::unique_ptr<IServer> MakeServer(const IServerConfig& config);
-
+    LOG(ERROR) << "Client connection received message: " << message;
 }
 
-#endif // BIRCH_SERVER_H
+void Dispatcher::OnMessage(const IServerConnection& connection, const Message& message)
+{
+    LOG(ERROR) << "Server connection received message: " << message;
+}
+
+}

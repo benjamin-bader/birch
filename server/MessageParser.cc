@@ -22,7 +22,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "asio.hpp"
+#include <asio.hpp>
 
 namespace birch {
 
@@ -54,7 +54,7 @@ namespace {
 // cache lines than the current code, which may outweigh any branch-predictor
 // gains.
 
-inline constexpr bool IsUserChar(char c)
+constexpr bool IsUserChar(char c)
 {
     // RFC 2812 2.3:
     // User names can be any octet except:
@@ -62,7 +62,7 @@ inline constexpr bool IsUserChar(char c)
     return c != '\0' && c != '\r' && c != '\n' && c != ' ' && c != '@';
 }
 
-inline constexpr bool IsKeyChar(char c)
+constexpr bool IsKeyChar(char c)
 {
     return (c >= 0x21 && c <= 0x7F)
         || (c >= 0x0E && c <= 0x1F)
@@ -72,22 +72,22 @@ inline constexpr bool IsKeyChar(char c)
         || c == 0x0C;
 }
 
-inline constexpr bool IsLetter(char c)
+constexpr bool IsLetter(char c)
 {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 }
 
-inline constexpr bool IsDigit(char c)
+constexpr bool IsDigit(char c)
 {
     return (c >= '0' && c <= '9');
 }
 
-inline constexpr bool IsHex(char c)
+constexpr bool IsHex(char c)
 {
     return IsDigit(c) || (c >= 'A' && c <= 'F');
 }
 
-inline constexpr bool IsSpecial(char c)
+constexpr bool IsSpecial(char c)
 {
     // RFC 2812 2.3:
     // "special" chars are: '[', ']', '\', '`', '_', '^', '{', '|', '}'
@@ -95,12 +95,12 @@ inline constexpr bool IsSpecial(char c)
     return (c >= 0x5B && c <= 0x60) || (c >= 0x7B && c <= 0x7D);
 }
 
-inline constexpr bool IsWild(char c)
+constexpr bool IsWild(char c)
 {
     return c == '*' || c == '?';
 }
 
-inline constexpr bool IsPrefixChar(char c)
+constexpr bool IsPrefixChar(char c)
 {
     return IsLetter(c)
         || IsDigit(c)
@@ -112,7 +112,7 @@ inline constexpr bool IsPrefixChar(char c)
         || c == ':'; // IPv6 addresses have colons
 }
 
-inline constexpr bool IsParamStartChar(char c)
+constexpr bool IsParamStartChar(char c)
 {
     int i = static_cast<int>(c);
     return (i >= 0x3B && i <= 0xFF)
@@ -315,6 +315,18 @@ ParseState MessageParser::Consume(Message& message, char input)
             {
                 NEXT(parseStateParam);
                 m_buffer.push_back(input);
+                return ParseState::Incomplete;
+            }
+
+            if (input == '\r')
+            {
+                NEXT(parseStateCr);
+                return ParseState::Incomplete;
+            }
+
+            if (input == ' ')
+            {
+                NEXT(parseStateParamStart);
                 return ParseState::Incomplete;
             }
 

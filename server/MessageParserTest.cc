@@ -124,4 +124,28 @@ TEST_F(ParserTest, PrefixCanBeIPv4)
     EXPECT_EQ("127.0.0.1", message.GetPrefix());
 }
 
+TEST_F(ParserTest, CommandWithSpaceAfterName)
+{
+    EXPECT_EQ(ParseState::Complete, Parse("LIST \r\n"));
+    EXPECT_EQ("LIST", message.GetCommand());
+    EXPECT_EQ(0, message.GetParams().size());
+}
+
+TEST_F(ParserTest, CommandWithSpaceAfterNameAndParam)
+{
+    EXPECT_EQ(ParseState::Complete, Parse("LIST foo \r\n"));
+    EXPECT_EQ("LIST", message.GetCommand());
+    EXPECT_EQ(1, message.GetParams().size());
+    EXPECT_EQ("foo", message.GetParams()[0]);
+}
+
+TEST_F(ParserTest, CommandWithSeveralSpacesAfterName)
+{
+    EXPECT_EQ(ParseState::Complete, Parse("LIST foo bar    \r\n"));
+    EXPECT_EQ("LIST", message.GetCommand());
+    EXPECT_EQ(2, message.GetParams().size());
+    EXPECT_EQ("foo", message.GetParams()[0]);
+    EXPECT_EQ("bar", message.GetParams()[1]);
+}
+
 }

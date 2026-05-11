@@ -16,3 +16,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "ConnectionList.h"
+
+namespace birch {
+
+class ConnectionList : public IConnectionList
+{
+public:
+    ConnectionList();
+    virtual ~ConnectionList() override;
+
+    virtual void AddConnection(const IClientConnection& connection) override;
+    virtual void RemoveConnection(const IClientConnection& connection) override;
+    virtual void AddConnection(const IServerConnection& connection) override;
+    virtual void RemoveConnection(const IServerConnection& connection) override;
+    virtual void GetConnections() const override;
+};
+
+}

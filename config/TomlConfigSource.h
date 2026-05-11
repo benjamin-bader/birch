@@ -1,6 +1,6 @@
 // birch - IRC daemon, built with Bazel
 //
-// Copyright (C) 2018 Benjamin Bader
+// Copyright (C) 2026 Benjamin Bader
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,34 +15,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_H
-#define BIRCH_SERVER_H
+#ifndef BIRCH_CONFIG_CONFIGSOURCE_H
+#define BIRCH_CONFIG_CONFIGSOURCE_H
 
-#include <cstdint>
+#include <filesystem>
 #include <memory>
+#include <string>
+
+#include "IConfigSource.h"
 
 namespace birch {
 
-class IServerConfig
+class TomlConfigSource : public IConfigSource
 {
-public:
-    virtual ~IServerConfig() = default;
+    std::filesystem::path m_path;
 
-    virtual unsigned int GetNumWorkers() const = 0;
-    virtual uint16_t GetPort() const = 0;
-    virtual uint16_t GetTlsPort() const = 0;
+public:
+    TomlConfigSource(const std::filesystem::path& path);
+
+    static absl::StatusOr<std::unique_ptr<IConfigSource>> CreateFromTomlFile(const std::filesystem::path& path);
+
+    absl::StatusOr<KeyValuePairs> LoadConfigValues() const override;
 };
 
-class IServer
-{
-public:
-    virtual ~IServer() = default;
+} // namespace birch
 
-    virtual void ServeForever() = 0;
-};
-
-std::unique_ptr<IServer> MakeServer(const IServerConfig& config);
-
-}
-
-#endif // BIRCH_SERVER_H
+#endif // BIRCH_CONFIG_CONFIGSOURCE_H

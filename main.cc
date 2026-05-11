@@ -15,29 +15,29 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <string>
+
 #include "server/Server.h"
 
-#include <iostream>
-
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
-#include "tclap/CmdLine.h"
+#include "absl/flags/parse.h"
+#include "absl/flags/usage.h"
+#include "absl/flags/usage_config.h"
+#include "absl/log/log.h"
+#include "absl/log/initialize.h"
+#include "absl/strings/str_cat.h"
 
 int main(int argc, char** argv)
 {
-  auto console = spdlog::stdout_color_mt("console");
-  try
+  absl::FlagsUsageConfig config;
+  config.version_string = []() -> std::string
   {
-    TCLAP::CmdLine cmd("TODO: Make an IRC server", ' ', "0.1.0");
-    cmd.parse(argc, argv);
+    return absl::StrCat("birch ", VERSION); // this will always look like a compiler error in the IDE; bazel provides this as a define.
+  };
+  
+  absl::SetProgramUsageMessage("TODO: Make an IRC server");
+  absl::ParseCommandLine(argc, argv);
 
-    console->info("Hello, you!");
-  }
-  catch (const TCLAP::ArgException& e)
-  {
-    std::cerr << "oh no\n" << e.error() << std::endl;
-    return 1;
-  }
+  absl::InitializeLog();
 
   return 0;
 }

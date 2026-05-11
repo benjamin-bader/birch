@@ -17,6 +17,7 @@
 
 #include "Message.h"
 
+#include <iostream>
 #include <utility>
 
 namespace birch {
@@ -64,6 +65,20 @@ const std::string& Message::GetCommand() const noexcept
 const std::vector<std::string>& Message::GetParams() const noexcept
 {
     return m_params;
+}
+
+std::ostream& operator<<(std::ostream& os, const Message& message)
+{
+    os << "Message(";
+    os << "prefix=" << message.GetPrefix() << ", ";
+    os << "command=" << message.GetCommand() << ", ";
+    os << "params=[";
+    for (const auto& param : message.GetParams())
+    {
+        os << param << ", ";
+    }
+    os << "])";
+    return os;
 }
 
 }

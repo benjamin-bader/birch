@@ -1,6 +1,6 @@
 // birch - IRC daemon, built with Bazel
 //
-// Copyright (C) 2018 Benjamin Bader
+// Copyright (C) 2026 Benjamin Bader
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,32 +15,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_CONNECTIONLIST_H
-#define BIRCH_CONNECTIONLIST_H
+#ifndef BIRCH_DISPATCHER_H
+#define BIRCH_DISPATCHER_H
+
+#include <memory>
 
 #include "Connection.h"
+#include "Message.h"
 
 namespace birch {
 
 /**
- * An IConnectionList is a collection of connections.
- * It is responsible for managing the connections and
- * dispatching messages to the appropriate connections.
+ * An IDispatcher mediates between connections and the server.
+ * It is responsible for receiving messages from connections, relaying
+ * responses from the server, and managing backpressure between the two.
  */
-class IConnectionList
+class IDispatcher
 {
 public:
-    virtual ~IConnectionList() = default;
+    using Ptr = std::unique_ptr<IDispatcher>;
 
-    virtual void AddConnection(const IClientConnection& connection) = 0;
-    virtual void RemoveConnection(const IClientConnection& connection) = 0;
-    virtual void AddConnection(const IServerConnection& connection) = 0;
-    virtual void RemoveConnection(const IServerConnection& connection) = 0;
-    virtual void GetConnections() const = 0;
+    virtual ~IDispatcher() = default;
+
+    virtual void OnMessage(const IClientConnection& connection, const Message& message) = 0;
+    virtual void OnMessage(const IServerConnection& connection, const Message& message) = 0;
 };
-
-std::unique_ptr<IConnectionList> MakeConnectionList();
 
 }
 
-#endif
+#endif // BIRCH_DISPATCHER_H
