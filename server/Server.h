@@ -21,11 +21,15 @@
 #include <cstdint>
 #include <memory>
 
+#include "config/IConfig.h"
+
 namespace birch {
 
 class IServerConfig
 {
 public:
+    static std::shared_ptr<IServerConfig> Create(const std::shared_ptr<config::IConfig>& config);
+
     virtual ~IServerConfig() = default;
 
     virtual unsigned int GetNumWorkers() const = 0;
@@ -36,6 +40,8 @@ public:
 class IServer
 {
 public:
+    static std::shared_ptr<IServer> Create(const std::shared_ptr<IServerConfig>& config);
+
     virtual ~IServer() = default;
 
     virtual void ServeForever() = 0;

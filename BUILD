@@ -5,7 +5,11 @@ cc_binary(
     name = "birch",
     srcs = ["main.cc"],
     deps = [
+        "//config:config",
+        "//config:file_config_data_source",
+        "//config:toml_config",
         "//server",
+        "//util:file_watcher",
         "@abseil-cpp//absl/flags:flag",
         "@abseil-cpp//absl/flags:parse",
         "@abseil-cpp//absl/flags:usage",

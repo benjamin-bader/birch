@@ -15,8 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <filesystem>
 #include <string>
+#include <vector>
 
+#include "config/ConfigPath.h"
+#include "config/FileConfigDataSource.h"
+#include "config/TomlConfig.h"
+#include "config/IConfig.h"
 #include "server/Server.h"
 
 #include "absl/flags/parse.h"
@@ -28,16 +34,28 @@
 
 int main(int argc, char** argv)
 {
-  absl::FlagsUsageConfig config;
-  config.version_string = []() -> std::string
+  absl::FlagsUsageConfig usageConfig;
+  usageConfig.version_string = []() -> std::string
   {
     return absl::StrCat("birch ", VERSION); // this will always look like a compiler error in the IDE; bazel provides this as a define.
   };
   
   absl::SetProgramUsageMessage("TODO: Make an IRC server");
-  absl::ParseCommandLine(argc, argv);
+  std::vector<char*> positionalArgs = absl::ParseCommandLine(argc, argv);
 
   absl::InitializeLog();
+
+  auto configSource = birch::config::FileConfigDataSource::CreateFromFile("config.toml");
+  if (!configSource.ok()) {
+    LOG(ERROR) << "Failed to create config source: " << configSource.status();
+    return 1;
+  }
+
+  auto config = birch::config::TomlConfig::Create(std::move(*configSource));
+  if (config == nullptr) {
+    LOG(ERROR) << "Failed to create config";
+    return 1;
+  }
 
   return 0;
 }

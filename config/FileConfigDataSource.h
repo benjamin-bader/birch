@@ -15,29 +15,40 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_CONFIG_CONFIGSOURCE_H
-#define BIRCH_CONFIG_CONFIGSOURCE_H
+#ifndef BIRCH_CONFIG_FILECONFIGDATASOURCE_H
+#define BIRCH_CONFIG_FILECONFIGDATASOURCE_H
 
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "absl/status/statusor.h"
 
 #include "IConfigSource.h"
 
-namespace birch {
+namespace birch::config {
 
-class TomlConfigSource : public IConfigSource
+class FileConfigDataSource : public IConfigDataSource
 {
     std::filesystem::path m_path;
+    std::vector<Callback> m_watchers;
 
 public:
-    TomlConfigSource(const std::filesystem::path& path);
+    static absl::StatusOr<std::unique_ptr<IConfigDataSource>> CreateFromFile(const std::filesystem::path& path);
 
-    static absl::StatusOr<std::unique_ptr<IConfigSource>> CreateFromTomlFile(const std::filesystem::path& path);
+    FileConfigDataSource(const std::filesystem::path& path);
 
-    absl::StatusOr<KeyValuePairs> LoadConfigValues() const override;
+    absl::StatusOr<std::string> Read() const override;
+
+    void Subscribe(Callback&& callback) override;
+
+private:
+    void OnFileChanged();
+
+    void NotifyWatchers();
 };
 
 } // namespace birch
 
-#endif // BIRCH_CONFIG_CONFIGSOURCE_H
+#endif // BIRCH_CONFIG_FILECONFIGDATASOURCE_H

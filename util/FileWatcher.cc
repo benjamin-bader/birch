@@ -15,4 +15,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Config.h"
+#include "IFileWatcher.h"
+
+#ifdef __APPLE__
+#   include "util/KqueueFileWatcher.h"
+#   define IMPL KqueueFileWatcher
+#else
+#   error "Unsupported platform"
+#   define IMPL InotifyFileWatcher
+#endif
+
+namespace birch::util {
+
+absl::StatusOr<std::shared_ptr<IFileWatcher>> IFileWatcher::Create()
+{
+    return IMPL::Create();
+}
+
+} // namespace birch::util  

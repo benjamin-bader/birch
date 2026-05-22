@@ -18,39 +18,55 @@
 #ifndef BIRCH_CONFIG_ICONFIGSOURCE_H
 #define BIRCH_CONFIG_ICONFIGSOURCE_H
 
+#include <functional>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include "absl/status/statusor.h"
 
-namespace birch {
+namespace birch::config {
 
 /**
- * An IConfigSource is an object that can load configuration values.
+ * An IConfigDataSource is an object that can read configuration values from a source.
  *
- * Configuration values are key-value string pairs.  Keys are not guaranteed to be
- * unique.  Keys can express a hierarchy by separating components with a period,
- * for example, "server.port" and "server.tls_port" would be two distinct keys residing
- * under the same parent key "server".
+ * The source is typically a file, but doesn't have to be!
  *
- * No guarantees are made about the underlying format or storage mechanism of the configuration
- * values.  Keys are guaranteed to be valid UTF-8; values have no such guarantee at all.
+ * The source is read as a string, and the string is then used to load the configuration values.
+ *
+ * The source can be subscribed to changes, and the callback will be called whenever the source changes.
+ *
+ * Example usage:
+ *
+ *   // Create a data source
+ *   std::unique_ptr<IConfigDataSource> source = ...;
+ *
+ *   auto contents = source->Read();
+ *   if (!contents.ok()) {
+ *       LOG(ERROR) << "Failed to read configuration from source: " << contents.status().message();
+ *       return;
+ *   }
+ *   std::string config_contents = *contents;
+ *
+ *   // Subscribe to changes
+ *   source->Subscribe([]() {
+ *       // Handle configuration source changes here
+ *   });
  */
-class IConfigSource
+class IConfigDataSource
 {
 public:
-    using KeyValuePair = std::pair<std::string, std::string>;
-    using KeyValuePairs = std::vector<KeyValuePair>;
+    using Callback = std::function<void()>;
 
-    virtual ~IConfigSource() = default;
+    virtual ~IConfigDataSource() = default;
+
+    virtual absl::StatusOr<std::string> Read() const = 0;
 
     /**
-     * Loads the configuration values from the source.
+     * Subscribe to changes to the configuration source.  When the source changes, the callback
+     * will be invoked, and at that point the source will contain up-to-date data.
      *
-     * @return A vector of key-value pairs, or an error if the configuration values cannot be loaded.
+     * NOTE: This method is still in flux and is probably not implemented yet.
      */
-    virtual absl::StatusOr<KeyValuePairs> LoadConfigValues() const = 0;
+    virtual void Subscribe(Callback&& callback) = 0;
 };
 
 }

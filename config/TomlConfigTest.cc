@@ -15,28 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_CONFIG_IVALUESOURCE_H
-#define BIRCH_CONFIG_IVALUESOURCE_H
+#include "TomlConfig.h"
 
-#include <optional>
+#include "FileConfigDataSource.h"
 
-namespace birch {
+#include "gtest/gtest.h"
 
-/**
- * An IValueSource is an object that can provide a configuration value of
- * a given type.
- */
- template <typename T>
- class IValueSource
- {
- public:
-     virtual ~IValueSource() = default;
- 
-     virtual bool IsValid() const = 0;
- 
-     virtual std::optional<T> As() const = 0;
- };
+namespace birch::config {
 
+TEST(TomlConfigTest, CanCreateFromDataSource)
+{
+    auto source = FileConfigDataSource::CreateFromFile("test.toml");
+    ASSERT_TRUE(source.ok());
+    TomlConfig config(std::move(*source));
 }
 
-#endif // BIRCH_CONFIG_IVALUESOURCE_H
+} // namespace birch
