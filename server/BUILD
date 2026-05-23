@@ -12,23 +12,19 @@ cc_library(
     hdrs = ["MessageParser.h"],
     deps = [
         "message",
-        "@asio//:asio",
-    ],
-    copts = [
-        # ASIO spuriously triggers this warning on macOS.
-        "-Wno-unused-local-typedef",
+        "@asio",
     ],
 )
 
 cc_test(
     name = "message_parser_test",
+    size = "small",
     srcs = ["MessageParserTest.cc"],
     deps = [
         "message_parser",
         "//tools:test_main",
         "@googletest//:gtest",
     ],
-    size = "small",
 )
 
 cc_library(
@@ -39,13 +35,13 @@ cc_library(
 
 cc_test(
     name = "channel_test",
+    size = "small",
     srcs = ["ChannelTest.cc"],
     deps = [
         ":channel",
         "//tools:test_main",
         "@googletest//:gtest",
     ],
-    size = "small",
 )
 
 cc_library(
@@ -85,18 +81,14 @@ cc_library(
     name = "server",
     srcs = ["Server.cc"],
     hdrs = ["Server.h"],
+    visibility = ["//visibility:public"],
     deps = [
         ":channel",
-        ":message_parser",
         ":connection",
+        ":message_parser",
         ":user",
         "//config",
         "@abseil-cpp//absl/log",
-        "@asio//:asio",
+        "@asio",
     ],
-    copts = [
-        # ASIO spuriously triggers this warning on macOS.
-        "-Wno-unused-local-typedef",
-    ],
-    visibility = ["//visibility:public"],
 )

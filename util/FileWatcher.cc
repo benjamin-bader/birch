@@ -20,6 +20,9 @@
 #ifdef __APPLE__
 #   include "util/KqueueFileWatcher.h"
 #   define IMPL KqueueFileWatcher
+#elif defined(_WIN32)
+#   include "util/WinFileWatcher.h"
+#   define IMPL WinFileWatcher
 #else
 #   error "Unsupported platform"
 #   define IMPL InotifyFileWatcher
