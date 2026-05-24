@@ -87,10 +87,16 @@ public:
 
     ~WatchHandle() override
     {
-        Unwatch();
+        DoUnwatch();
     }
 
     void Unwatch() override
+    {
+        DoUnwatch();
+    }
+
+private:
+    void DoUnwatch()
     {
         if (auto w = m_watcher.lock())
         {
@@ -127,7 +133,7 @@ WinDirWatcher::Open(const fs::path& dir, HANDLE iocp)
         return WinErrorToStatus(e, "CreateIoCompletionPort(dir)");
     }
 
-    auto dw = std::shared_ptr<WinDirWatcher>(new WinDirWatcher(dir, h));
+    std::shared_ptr<WinDirWatcher> dw(new WinDirWatcher(dir, h));
     dw->m_io.owner = dw.get();
     return dw;
 }
@@ -269,6 +275,11 @@ void WinDirWatcher::ForEachEntry(WatchId id, const EntryConsumer& fn) const
 // ---------------------------------------------------------------------------
 // WinFileWatcher
 // ---------------------------------------------------------------------------
+
+absl::StatusOr<std::shared_ptr<IFileWatcher>> IFileWatcher::Create()
+{
+    return WinFileWatcher::Create();
+}
 
 absl::StatusOr<std::shared_ptr<WinFileWatcher>> WinFileWatcher::Create()
 {

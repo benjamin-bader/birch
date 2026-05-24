@@ -3,7 +3,13 @@ common --enable_platform_specific_config
 build:linux --cxxopt=-std=c++23
 build:macos --cxxopt=-std=c++23
 build:windows --cxxopt=/std:c++latest
+build:windows --cxxopt=/DUNICODE
+build:windows --cxxopt=/D_UNICODE
+build:windows --cxxopt=/D_WIN32_WINNT=0x0600
 build:clang-cl --cxxopt=/std:c++latest # MSVC's clang frontend takes MSVC-style flags
+build:clang-cl --cxxopt=/DUNICODE
+build:clang-cl --cxxopt=/D_UNICODE
+build:clang-cl --cxxopt=/D_WIN32_WINNT=0x0600
 
 # This warning is low-value and triggers when adding an asio dependency.
 build:linux --cxxopt=-Wno-unused-local-typedef

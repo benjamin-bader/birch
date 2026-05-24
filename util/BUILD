@@ -76,14 +76,9 @@ cc_library(
 
 cc_library(
     name = "file_watcher",
-    srcs = ["FileWatcher.cc"],
     visibility = ["//visibility:public"],
-    deps = [
-        ":file_watcher_interface",
-        "@abseil-cpp//absl/status:statusor",
-    ] + select({
+    deps = [":file_watcher_interface"] + select({
         "@platforms//os:macos": [":kqueue_file_watcher"],
         "@platforms//os:windows": [":win_file_watcher"],
-        "//conditions:default": [],
     }),
 )

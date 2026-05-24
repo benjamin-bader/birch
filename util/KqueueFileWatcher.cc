@@ -89,6 +89,11 @@ KqueueFileWatcher::Watch::Watch(WatchId id, const std::filesystem::path& path, c
 {
 }
 
+absl::StatusOr<std::shared_ptr<IFileWatcher>> IFileWatcher::Create()
+{
+    return KqueueFileWatcher::Create();
+}
+
 absl::StatusOr<std::shared_ptr<KqueueFileWatcher>> KqueueFileWatcher::Create()
 {
     int kq = ::kqueue();
