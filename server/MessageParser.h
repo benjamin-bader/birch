@@ -51,6 +51,10 @@ private:
     enum {
         parseStateStart = 0,
 
+        parseStateTagKey,
+        parseStateTagValue,
+        parseStateAfterTags,
+
         parseStatePrefix, // We don't attempt to validate the prefix during incremental parsing
 
         parseStateCommandNameOrNumber,

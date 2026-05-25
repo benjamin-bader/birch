@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
+
 namespace birch {
 
 class Message
@@ -30,6 +32,8 @@ class Message
     std::string m_command;
     std::vector<std::string> m_params;
 
+    absl::flat_hash_map<std::string, std::string> m_tags;
+
 public:
     Message() = default;
     Message(const Message&) = default;
@@ -37,6 +41,9 @@ public:
 
     Message& operator=(const Message&) = default;
     Message& operator=(Message&&) = default;
+
+    void AddTag(const std::string& key, const std::string& value);
+    void AddTag(std::string&& key, std::string&& value);
 
     void SetPrefix(const std::string& prefix);
     void SetPrefix(std::string&& prefix);
@@ -50,6 +57,7 @@ public:
     const std::string& GetPrefix() const noexcept;
     const std::string& GetCommand() const noexcept;
     const std::vector<std::string>& GetParams() const noexcept;
+    const absl::flat_hash_map<std::string, std::string>& GetTags() const noexcept;
 };
 
 std::ostream& operator<<(std::ostream& os, const Message& message);

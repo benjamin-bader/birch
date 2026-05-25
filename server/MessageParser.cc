@@ -21,6 +21,9 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
+
+#include "absl/strings/str_split.h"
 
 #include <asio.hpp>
 
@@ -122,6 +125,11 @@ constexpr bool IsParamStartChar(char c)
         || (i >= 0x01 && i <= 0x09);
 }
 
+constexpr bool IsTagKeyChar(char c)
+{
+    return IsLetter(c) || IsDigit(c) || c == '-' || c == '/' || c == '+';
+}
+
 bool IsValidHostname(const char* begin, const char* end) noexcept
 {
     bool shortnameStart = true;
@@ -193,6 +201,114 @@ ParseState MessageParser::Consume(Message& message, char input)
     switch (m_state)
     {
         case parseStateStart:
+            if (input == '@')
+            {
+                NEXT(parseStateTagKey);
+                return ParseState::Incomplete;
+            }
+
+            if (input == ':')
+            {
+                NEXT(parseStatePrefix);
+                // don't include the colon in the prefix buffer
+                return ParseState::Incomplete;
+            }
+
+            if (IsLetter(input))
+            {
+                NEXT(parseStateCommandName);
+                m_buffer.push_back(input);
+                return ParseState::Incomplete;
+            }
+
+            if (IsDigit(input))
+            {
+                NEXT(parseStateCommandNumber);
+                m_buffer.push_back(input);
+                return ParseState::Incomplete;
+            }
+
+            return ParseState::Invalid;
+
+        case parseStateTagKey:
+            // TODO: This admits multiple + characters at any point in the key name.  Technically,
+            // only a single + is allowed and only at the beginning (it indicates a client-only tag).
+            // We'd need a new parse state for this.
+            if (IsTagKeyChar(input))
+            {
+                m_buffer.push_back(input);
+                return ParseState::Incomplete;
+            }
+
+            if (input == '=')
+            {
+                if (m_buffer.empty())
+                {
+                    return ParseState::Invalid;
+                }
+
+                NEXT(parseStateTagValue);
+                m_buffer.push_back(input);
+                return ParseState::Incomplete;
+            }
+
+            if (input == ' ')
+            {
+                if (!m_buffer.empty())
+                {
+                    message.AddTag(std::move(m_buffer), "");
+                    m_buffer.clear();
+                }
+
+                NEXT(parseStateAfterTags);
+                return ParseState::Incomplete;
+            }
+
+            return ParseState::Invalid;
+
+        case parseStateTagValue:
+            if (input == ' ')
+            {
+                NEXT(parseStateAfterTags);
+                std::vector<std::string> tags = absl::StrSplit(m_buffer, absl::MaxSplits('=', 2));
+                if (tags.size() < 2)
+                {
+                    // missing value, that's weird?  treat it as an empty value.
+                    tags.push_back("");
+                }
+                message.AddTag(tags[0], tags[1]);
+                m_buffer.clear();
+                return ParseState::Incomplete;
+            }
+
+            if (input == ';')
+            {
+                NEXT(parseStateTagKey);
+                std::vector<std::string> tags = absl::StrSplit(m_buffer, absl::MaxSplits('=', 2));
+                if (tags.size() < 2)
+                {
+                    tags.push_back("");
+                }
+                message.AddTag(tags[0], tags[1]);
+                m_buffer.clear();
+                return ParseState::Incomplete;
+            }
+
+            if (input != ' ' && input != '\r' && input != '\n')
+            {
+                m_buffer.push_back(input);
+                return ParseState::Incomplete;
+            }
+        
+            return ParseState::Invalid;
+
+        case parseStateAfterTags:
+            if (input == ' ')
+            {
+                // Eat whitespace.  _Technically_ there should be only one, but I don't want to implement another parse state for that.
+                return ParseState::Incomplete;
+            }
+
             if (input == ':')
             {
                 NEXT(parseStatePrefix);

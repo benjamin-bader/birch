@@ -4,6 +4,9 @@ cc_library(
     name = "message",
     srcs = ["Message.cc"],
     hdrs = ["Message.h"],
+    deps = [
+        "@abseil-cpp//absl/container:flat_hash_map",
+    ],
 )
 
 cc_library(
@@ -12,6 +15,7 @@ cc_library(
     hdrs = ["MessageParser.h"],
     deps = [
         "message",
+        "@abseil-cpp//absl/strings",
         "@asio",
     ],
 )

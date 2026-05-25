@@ -148,4 +148,37 @@ TEST_F(ParserTest, CommandWithSeveralSpacesAfterName)
     EXPECT_EQ("bar", message.GetParams()[1]);
 }
 
+TEST_F(ParserTest, CommandWithTags)
+{
+    EXPECT_EQ(ParseState::Complete, Parse("@foo=bar;baz=qux LIST\r\n"));
+    EXPECT_EQ("LIST", message.GetCommand());
+    EXPECT_EQ(0, message.GetParams().size());
+    EXPECT_EQ(2, message.GetTags().size());
+    
+    auto tags = message.GetTags();
+    EXPECT_EQ("bar", tags["foo"]);
+    EXPECT_EQ("qux", tags["baz"]);
+}
+
+TEST_F(ParserTest, CommandWithEmptyTagValue)
+{
+    EXPECT_EQ(ParseState::Complete, Parse("@foo=;baz=qux LIST\r\n"));
+    EXPECT_EQ("LIST", message.GetCommand());
+    EXPECT_EQ(0, message.GetParams().size());
+    EXPECT_EQ(2, message.GetTags().size());
+    auto tags = message.GetTags();
+    EXPECT_EQ("", tags["foo"]);
+    EXPECT_EQ("qux", tags["baz"]);
+}
+
+TEST_F(ParserTest, CommandWithClientOnlyTag)
+{
+    EXPECT_EQ(ParseState::Complete, Parse("@+foo=bar LIST\r\n"));
+    EXPECT_EQ("LIST", message.GetCommand());
+    EXPECT_EQ(0, message.GetParams().size());
+    EXPECT_EQ(1, message.GetTags().size());
+    auto tags = message.GetTags();
+    EXPECT_EQ("bar", tags["+foo"]);
+}
+
 }

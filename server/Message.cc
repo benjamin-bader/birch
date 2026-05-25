@@ -22,6 +22,16 @@
 
 namespace birch {
 
+void Message::AddTag(const std::string& key, const std::string& value)
+{
+    m_tags[key] = value;
+}
+
+void Message::AddTag(std::string&& key, std::string&& value)
+{
+    m_tags.emplace(std::move(key), std::move(value));
+}
+
 void Message::SetPrefix(const std::string& prefix)
 {
     m_prefix = prefix;
@@ -65,6 +75,11 @@ const std::string& Message::GetCommand() const noexcept
 const std::vector<std::string>& Message::GetParams() const noexcept
 {
     return m_params;
+}
+
+const absl::flat_hash_map<std::string, std::string>& Message::GetTags() const noexcept
+{
+    return m_tags;
 }
 
 std::ostream& operator<<(std::ostream& os, const Message& message)

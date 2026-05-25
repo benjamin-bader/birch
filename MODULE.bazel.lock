@@ -271,7 +271,7 @@
   "moduleExtensions": {
     "//:version.bzl%version_extension": {
       "general": {
-        "bzlTransitiveDigest": "TCmLkVN3DsixKlOxpcYGTREJZU64gLVjbHlF/hFqPQA=",
+        "bzlTransitiveDigest": "Vl63gdwoQns5Ha3hdnD6xDw36e/otPYGLPj5+mp1IjM=",
         "usagesDigest": "CFO8MEA72LVNcgKPN2Sb/3D30gtOeZDEZGoMlw6xLvo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
