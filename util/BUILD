@@ -9,6 +9,23 @@ cc_library(
 )
 
 cc_library(
+    name = "inotify_file_watcher",
+    srcs = ["InotifyFileWatcher.cc"],
+    hdrs = ["InotifyFileWatcher.h"],
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":file_watcher_interface",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+    ],
+)
+
+cc_library(
     name = "kqueue_file_watcher",
     srcs = ["KqueueFileWatcher.cc"],
     hdrs = ["KqueueFileWatcher.h"],
@@ -78,6 +95,7 @@ cc_library(
     name = "file_watcher",
     visibility = ["//visibility:public"],
     deps = [":file_watcher_interface"] + select({
+        "@platforms//os:linux": [":inotify_file_watcher"],
         "@platforms//os:macos": [":kqueue_file_watcher"],
         "@platforms//os:windows": [":win_file_watcher"],
     }),
