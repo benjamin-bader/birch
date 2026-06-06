@@ -23,6 +23,8 @@
 #include "absl/status/status.h"
 #include "gtest/gtest.h"
 
+#include "util/IFileWatcher.h"
+
 namespace birch::config {
 
 class FileConfigDataSourceTest : public testing::Test
@@ -32,7 +34,12 @@ protected:
 
     void SetUp() override
     {
+        auto status = birch::util::InitializeGlobalFileWatcher();
+        ASSERT_TRUE(status.ok());
         m_path = std::filesystem::path(testing::TempDir()) / "config.toml";
+
+        std::ofstream os(m_path);
+        os << "server_name = \"irc.example.com\"" << std::endl;
     }
 
     void TearDown() override
@@ -41,27 +48,15 @@ protected:
     }
 };
 
-TEST_F(FileConfigDataSourceTest, CreateFromFileReturnsUsableSource)
-{
-    auto source = FileConfigDataSource::CreateFromFile("test.toml");
-    ASSERT_TRUE(source.ok());
-    EXPECT_NE(*source, nullptr);
-}
-
 TEST_F(FileConfigDataSourceTest, CreateFromFileAcceptsAbsolutePath)
 {
-    auto source = FileConfigDataSource::CreateFromFile(std::filesystem::path("/etc/birch/test.toml"));
+    auto source = FileConfigDataSource::CreateFromFile(std::filesystem::path(m_path));
     ASSERT_TRUE(source.ok());
     EXPECT_NE(*source, nullptr);
 }
 
 TEST_F(FileConfigDataSourceTest, ReadReturnsFileContents)
 {   
-    {
-        std::ofstream file(m_path);
-        file << "server_name = \"irc.example.com\"\n";
-    }
-
     FileConfigDataSource source(m_path);
     auto contents = source.Read();
 

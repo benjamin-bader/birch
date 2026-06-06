@@ -15,31 +15,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "TomlConfig.h"
+#ifndef BIRCH_SERVER_MESSAGESERIALIZER_H
+#define BIRCH_SERVER_MESSAGESERIALIZER_H
 
-#include <filesystem>
+#include <cstddef>
+#include <span>
 
-#include "gtest/gtest.h"
+#include "server/Message.h"
 
-#include "FileConfigDataSource.h"
+namespace birch::server {
 
-namespace birch::config {
-
-TEST(TomlConfigTest, CanCreateFromDataSource)
+class MessageSerializer
 {
-    ASSERT_TRUE(util::InitializeGlobalFileWatcher().ok());
+public:
+    std::size_t ComputeRequiredSpace(const Message& message);
+    std::size_t WriteToBuffer(std::span<char> buffer, const Message& message);
+};
 
-    std::filesystem::path dir = testing::TempDir();
-    std::filesystem::path file = dir / "test.toml";
+} // namespace birch::server
 
-    {
-        std::ofstream os(file);
-        os << "server_name = \"irc.example.com\"";
-    }
-
-    auto source = FileConfigDataSource::CreateFromFile(file);
-    ASSERT_TRUE(source.ok());
-    TomlConfig config(std::move(*source));
-}
-
-} // namespace birch
+#endif

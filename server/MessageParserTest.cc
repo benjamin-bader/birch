@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-namespace birch {
+namespace birch::server {
 
 class ParserTest : public testing::Test
 {
@@ -154,7 +154,7 @@ TEST_F(ParserTest, CommandWithTags)
     EXPECT_EQ("LIST", message.GetCommand());
     EXPECT_EQ(0, message.GetParams().size());
     EXPECT_EQ(2, message.GetTags().size());
-    
+
     auto tags = message.GetTags();
     EXPECT_EQ("bar", tags["foo"]);
     EXPECT_EQ("qux", tags["baz"]);
@@ -181,4 +181,4 @@ TEST_F(ParserTest, CommandWithClientOnlyTag)
     EXPECT_EQ("bar", tags["+foo"]);
 }
 
-}
+} // namespace birch::server

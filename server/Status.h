@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_STATUS_H
-#define BIRCH_STATUS_H
+#ifndef BIRCH_SERVER_STATUS_H
+#define BIRCH_SERVER_STATUS_H
 
 #include <cstdint>
 
-namespace birch {
+namespace birch::server {
 
 enum class ResponseStatus : uint16_t
 {
@@ -29,7 +29,7 @@ enum class ResponseStatus : uint16_t
     RPL_CREATED = 3,
     RPL_MYINFO = 4,
     RPL_BOUNCE = 5,
-    
+
 
     // 2XX tracing responses
     RPL_TRACELINK = 200,
@@ -95,6 +95,6 @@ enum class ResponseStatus : uint16_t
 
 };
 
-}
+} // namespace birch::server
 
-#endif // BIRCH_STATUS_H
+#endif // BIRCH_SERVER_STATUS_H

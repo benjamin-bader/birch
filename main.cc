@@ -45,6 +45,12 @@ int main(int argc, char** argv)
 
   absl::InitializeLog();
 
+  auto status = birch::util::InitializeGlobalFileWatcher();
+  if (!status.ok()) {
+    LOG(ERROR) << "Failed to initialize global file watcher: " << status;
+    return 1;
+  }
+
   auto configSource = birch::config::FileConfigDataSource::CreateFromFile("config.toml");
   if (!configSource.ok()) {
     LOG(ERROR) << "Failed to create config source: " << configSource.status();

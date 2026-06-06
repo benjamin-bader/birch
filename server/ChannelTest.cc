@@ -19,7 +19,7 @@
 
 #include "gtest/gtest.h"
 
-namespace birch {
+namespace birch::server {
 
 TEST(ChannelNames, MinimumLengthEnforced)
 {
@@ -47,4 +47,4 @@ TEST(ChannelNames, ChannelPrefixValidation)
     EXPECT_FALSE(IsValidChannelName("$chan"));
 }
 
-}
+} // namespace birch::server

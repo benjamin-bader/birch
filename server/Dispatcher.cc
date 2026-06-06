@@ -19,7 +19,7 @@
 
 #include "absl/log/log.h"
 
-namespace birch {
+namespace birch::server {
 
 class Dispatcher : public IDispatcher
 {
@@ -38,4 +38,4 @@ void Dispatcher::OnMessage(const IServerConnection& connection, const Message& m
     LOG(ERROR) << "Server connection received message: " << message;
 }
 
-}
+} // namespace birch::server

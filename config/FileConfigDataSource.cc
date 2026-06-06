@@ -19,21 +19,35 @@
 
 #include <cerrno>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <string>
+#include <system_error>
 
 #include "absl/log/log.h"
 #include "absl/strings/str_format.h"
+
+#include "util/IFileWatcher.h"
 
 namespace birch::config {
 
 absl::StatusOr<std::unique_ptr<IConfigDataSource>> FileConfigDataSource::CreateFromFile(const std::filesystem::path& path)
 {
-    // TODO:
-    // - Validate that the file exists and is suitable for a config source
-    // - Create a watcher for the file
+    std::error_code ec;
+    if (!std::filesystem::is_regular_file(path, ec)) {
+        if (ec) {
+            return absl::ErrnoToStatus(ec.value(), "is_regular_file() failed");
+        }
+        return absl::InvalidArgumentError(absl::StrFormat("File %s is not a regular file", path.string()));
+    }
 
-    return std::make_unique<FileConfigDataSource>(path);
+    auto source = std::make_unique<FileConfigDataSource>(path);
+    auto status = source->InitializeFileWatch();
+    if (!status.ok()) {
+        return status;
+    }
+
+    return std::move(source);
 }
 
 FileConfigDataSource::FileConfigDataSource(const std::filesystem::path& path)
@@ -58,7 +72,23 @@ absl::StatusOr<std::string> FileConfigDataSource::Read() const
 
 void FileConfigDataSource::Subscribe(Callback&& callback)
 {
-    m_watchers.push_back(std::move(callback));
+    std::lock_guard lock(m_mutex);
+    m_callbacks.push_back(std::move(callback));
+}
+
+absl::Status FileConfigDataSource::InitializeFileWatch()
+{
+    auto handle = util::GetGlobalFileWatcher()->WatchFile(m_path, [this](const std::filesystem::path& path) {
+        this->OnFileChanged();
+    });
+
+    if (!handle.ok()) {
+        return handle.status();
+    }
+
+    m_watchHandle = std::move(*handle);
+
+    return absl::OkStatus();
 }
 
 void FileConfigDataSource::OnFileChanged()
@@ -68,9 +98,15 @@ void FileConfigDataSource::OnFileChanged()
 
 void FileConfigDataSource::NotifyWatchers()
 {
-    for (const auto& watcher : m_watchers)
+    std::vector<Callback> callbacks;
     {
-        watcher();
+        std::lock_guard lock(m_mutex);
+        callbacks = m_callbacks; // copy that floppy
+    }
+
+    for (const auto& cb : callbacks)
+    {
+        cb();
     }
 }
 

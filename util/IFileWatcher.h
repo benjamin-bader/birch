@@ -49,6 +49,10 @@ public:
     ) = 0;
 };
 
+absl::Status InitializeGlobalFileWatcher();
+
+IFileWatcher* GetGlobalFileWatcher();
+
 } // namespace birch::util
 
 #endif // BIRCH_UTIL_IFILEWATCHER_H

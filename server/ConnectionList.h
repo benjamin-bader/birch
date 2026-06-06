@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_CONNECTIONLIST_H
-#define BIRCH_CONNECTIONLIST_H
+#ifndef BIRCH_SERVER_CONNECTIONLIST_H
+#define BIRCH_SERVER_CONNECTIONLIST_H
 
 #include "Connection.h"
 
-namespace birch {
+namespace birch::server {
 
 /**
  * An IConnectionList is a collection of connections.
@@ -41,6 +41,6 @@ public:
 
 std::unique_ptr<IConnectionList> MakeConnectionList();
 
-}
+} // namespace birch::server
 
 #endif

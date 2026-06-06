@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_USER_H
-#define BIRCH_USER_H
+#ifndef BIRCH_SERVER_USER_H
+#define BIRCH_SERVER_USER_H
 
-namespace birch {
+namespace birch::server {
 
 class IUser
 {
 
 };
 
-}
+} // namespace birch::server
 
 #endif

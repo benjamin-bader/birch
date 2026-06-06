@@ -17,19 +17,19 @@
 
 #include "ConnectionList.h"
 
-namespace birch {
+namespace birch::server {
 
 class ConnectionList : public IConnectionList
 {
 public:
     ConnectionList();
-    virtual ~ConnectionList() override;
+    ~ConnectionList() override;
 
-    virtual void AddConnection(const IClientConnection& connection) override;
-    virtual void RemoveConnection(const IClientConnection& connection) override;
-    virtual void AddConnection(const IServerConnection& connection) override;
-    virtual void RemoveConnection(const IServerConnection& connection) override;
-    virtual void GetConnections() const override;
+    void AddConnection(const IClientConnection& connection) override;
+    void RemoveConnection(const IClientConnection& connection) override;
+    void AddConnection(const IServerConnection& connection) override;
+    void RemoveConnection(const IServerConnection& connection) override;
+    void GetConnections() const override;
 };
 
-}
+} // namespace birch::serer

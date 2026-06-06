@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-namespace birch {
+namespace birch::server {
 
 bool IsValidChannelName(const std::string& name)
 {

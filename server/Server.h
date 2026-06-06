@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_H
-#define BIRCH_SERVER_H
+#ifndef BIRCH_SERVER_SERVER_H
+#define BIRCH_SERVER_SERVER_H
 
 #include <cstdint>
 #include <memory>
 
 #include "config/IConfig.h"
 
-namespace birch {
+namespace birch::server {
 
 class IServerConfig
 {
@@ -49,6 +49,6 @@ public:
 
 std::unique_ptr<IServer> MakeServer(const IServerConfig& config);
 
-}
+} // namespace birch::server
 
-#endif // BIRCH_SERVER_H
+#endif // BIRCH_SERVER_SERVER_H

@@ -15,12 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_CHANNEL_H
-#define BIRCH_CHANNEL_H
+#ifndef BIRCH_SERVER_CHANNEL_H
+#define BIRCH_SERVER_CHANNEL_H
 
 #include <string>
 
-namespace birch {
+namespace birch::server {
 
 bool IsValidChannelName(const std::string& name);
 
@@ -65,7 +65,7 @@ public:
 
     /**
      * Returns @c true if the channel is "safe".
-     * 
+     *
      * Safe channels continue to exist even after the last
      * user departs.  In contrast, non-safe channels expire
      * when they have no members.
@@ -75,6 +75,6 @@ public:
     virtual bool HasMode(ChannelModes mode) const noexcept = 0;
 };
 
-}
+} // namespace birch::server
 
 #endif

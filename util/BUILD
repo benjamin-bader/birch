@@ -94,6 +94,7 @@ cc_library(
 cc_library(
     name = "file_watcher",
     visibility = ["//visibility:public"],
+    srcs = ["FileWatcher.cc"],
     deps = [":file_watcher_interface"] + select({
         "@platforms//os:linux": [":inotify_file_watcher"],
         "@platforms//os:macos": [":kqueue_file_watcher"],

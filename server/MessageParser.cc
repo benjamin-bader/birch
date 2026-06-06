@@ -27,7 +27,7 @@
 
 #include <asio.hpp>
 
-namespace birch {
+namespace birch::server {
 
 namespace {
 
@@ -299,7 +299,7 @@ ParseState MessageParser::Consume(Message& message, char input)
                 m_buffer.push_back(input);
                 return ParseState::Incomplete;
             }
-        
+
             return ParseState::Invalid;
 
         case parseStateAfterTags:
@@ -410,7 +410,7 @@ ParseState MessageParser::Consume(Message& message, char input)
                 m_buffer.clear();
                 return ParseState::Incomplete;
             }
-        
+
             if (IsDigit(input) && m_buffer.size() < 3)
             {
                 m_buffer.push_back(input);
@@ -624,4 +624,4 @@ bool MessageParser::IsValidPrefix() const noexcept
     return IsValidHostname(hostStart, end) || IsInternetAddress(hostStart);
 }
 
-} // birch
+} // namespace birch::server

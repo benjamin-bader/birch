@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_MESSAGEPARSER_H
-#define BIRCH_MESSAGEPARSER_H
+#ifndef BIRCH_SERVER_MESSAGEPARSER_H
+#define BIRCH_SERVER_MESSAGEPARSER_H
 
 #include <array>
 #include <string>
 
 #include "Message.h"
 
-namespace birch {
+namespace birch::server {
 
 enum class ParseState
 {
@@ -77,17 +77,13 @@ template <typename InputIter>
 ParseState MessageParser::Parse(Message& message, InputIter& iter, InputIter end)
 {
     ParseState state = ParseState::Incomplete;
-    while (iter != end)
+    while (iter != end && state == ParseState::Incomplete)
     {
         state = Consume(message, *iter++);
-        if (state != ParseState::Incomplete)
-        {
-            break;
-        }
     }
     return state;
 }
 
-}
+} // namespace birch::server
 
 #endif

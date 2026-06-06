@@ -15,31 +15,37 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "TomlConfig.h"
+#include "Session.h"
 
-#include <filesystem>
+namespace birch::server {
 
-#include "gtest/gtest.h"
-
-#include "FileConfigDataSource.h"
-
-namespace birch::config {
-
-TEST(TomlConfigTest, CanCreateFromDataSource)
+Session::Session(std::weak_ptr<IConnection> connection)
+    : m_connection{std::move(connection)}
 {
-    ASSERT_TRUE(util::InitializeGlobalFileWatcher().ok());
-
-    std::filesystem::path dir = testing::TempDir();
-    std::filesystem::path file = dir / "test.toml";
-
-    {
-        std::ofstream os(file);
-        os << "server_name = \"irc.example.com\"";
-    }
-
-    auto source = FileConfigDataSource::CreateFromFile(file);
-    ASSERT_TRUE(source.ok());
-    TomlConfig config(std::move(*source));
 }
 
-} // namespace birch
+void Session::SendResponse(const Message& message)
+{
+    if (auto connection = m_connection.lock())
+    {
+        connection->DeliverResponse(message);
+    }
+}
+
+void Session::HandlePing(const Message& message)
+{
+    std::string token;
+    if (message.GetParams().size() > 0)
+    {
+        token = *message.GetParams().rbegin();
+    }
+
+    Message response = Message::Builder()
+        .WithCommand("PONG")
+        .WithParam("TODO(server info here)")
+        .WithParam(token)
+        .Build();
+    SendResponse(response);
+}
+
+} // namespace birch::server

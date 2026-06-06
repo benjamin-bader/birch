@@ -15,13 +15,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_COMMANDHANDLER_H
-#define BIRCH_COMMANDHANDLER_H
+#ifndef BIRCH_SERVER_COMMANDHANDLER_H
+#define BIRCH_SERVER_COMMANDHANDLER_H
 
 #include <future>
 #include <string>
 
-namespace birch {
+namespace birch::server {
 
 class IServer;
 
@@ -34,6 +34,6 @@ public:
     virtual int NumRequiredParams() const noexcept = 0;
 };
 
-}
+} // namespace birch::server
 
 #endif

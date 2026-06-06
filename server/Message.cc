@@ -20,7 +20,12 @@
 #include <iostream>
 #include <utility>
 
-namespace birch {
+namespace birch::server {
+
+MessageBuilder Message::Builder()
+{
+    return MessageBuilder();
+}
 
 void Message::AddTag(const std::string& key, const std::string& value)
 {
@@ -77,7 +82,7 @@ const std::vector<std::string>& Message::GetParams() const noexcept
     return m_params;
 }
 
-const absl::flat_hash_map<std::string, std::string>& Message::GetTags() const noexcept
+const absl::linked_hash_map<std::string, std::string>& Message::GetTags() const noexcept
 {
     return m_tags;
 }
@@ -96,4 +101,62 @@ std::ostream& operator<<(std::ostream& os, const Message& message)
     return os;
 }
 
+MessageBuilder& MessageBuilder::WithPrefix(const std::string& prefix)
+{
+    m_message.SetPrefix(prefix);
+    return *this;
 }
+
+MessageBuilder& MessageBuilder::WithPrefix(std::string&& prefix)
+{
+    m_message.SetPrefix(std::move(prefix));
+    return *this;
+}
+
+MessageBuilder& MessageBuilder::WithCommand(const std::string& command)
+{
+    m_message.SetCommand(command);
+    return *this;
+}
+
+MessageBuilder& MessageBuilder::WithCommand(std::string&& command)
+{
+    m_message.SetCommand(std::move(command));
+    return *this;
+}
+
+MessageBuilder& MessageBuilder::WithParam(const std::string& param)
+{
+    m_message.AddParam(param);
+    return *this;
+}
+
+MessageBuilder& MessageBuilder::WithParam(std::string&& param)
+{
+    m_message.AddParam(std::move(param));
+    return *this;
+}
+
+MessageBuilder& MessageBuilder::WithTag(const std::string& key, const std::string& value)
+{
+    m_message.AddTag(key, value);
+    return *this;
+}
+
+MessageBuilder& MessageBuilder::WithTag(std::string&& key, std::string&& value)
+{
+    m_message.AddTag(std::move(key), std::move(value));
+    return *this;
+}
+
+Message MessageBuilder::Build() const &
+{
+    return m_message;
+}
+
+Message MessageBuilder::Build() &&
+{
+    return std::move(m_message);
+}
+
+} // namespace birch::server

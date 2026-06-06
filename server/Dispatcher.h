@@ -15,15 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_DISPATCHER_H
-#define BIRCH_DISPATCHER_H
+#ifndef BIRCH_SERVER_DISPATCHER_H
+#define BIRCH_SERVER_DISPATCHER_H
 
 #include <memory>
 
 #include "Connection.h"
 #include "Message.h"
 
-namespace birch {
+namespace birch::server {
 
 /**
  * An IDispatcher mediates between connections and the server.
@@ -41,6 +41,6 @@ public:
     virtual void OnMessage(const IServerConnection& connection, const Message& message) = 0;
 };
 
-}
+} // namespace birch::server
 
-#endif // BIRCH_DISPATCHER_H
+#endif // BIRCH_SERVER_DISPATCHER_H

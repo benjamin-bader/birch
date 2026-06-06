@@ -15,31 +15,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "TomlConfig.h"
+#ifndef BIRCH_UTIL_NOOPFILEWATCHER_H
+#define BIRCH_UTIL_NOOPFILEWATCHER_H
 
 #include <filesystem>
+#include <memory>
 
-#include "gtest/gtest.h"
+#include "absl/status/statusor.h"
 
-#include "FileConfigDataSource.h"
+#include "util/IFileWatcher.h"
 
-namespace birch::config {
-
-TEST(TomlConfigTest, CanCreateFromDataSource)
+namespace birch::util
 {
-    ASSERT_TRUE(util::InitializeGlobalFileWatcher().ok());
 
-    std::filesystem::path dir = testing::TempDir();
-    std::filesystem::path file = dir / "test.toml";
+// A no-op file watcher, for use on platforms for which file-watching hasn't
+// yet been implemented, or for cases where initializing an actual watcher
+// fails.
+class NoopFileWatcher : public IFileWatcher
+{
+public:
+    NoopFileWatcher() = default;
+    ~NoopFileWatcher() override = default;
 
-    {
-        std::ofstream os(file);
-        os << "server_name = \"irc.example.com\"";
-    }
+    absl::StatusOr<std::unique_ptr<IWatchHandle>> WatchFile(
+        const std::filesystem::path& path,
+        Callback callback
+    ) override;
+};
 
-    auto source = FileConfigDataSource::CreateFromFile(file);
-    ASSERT_TRUE(source.ok());
-    TomlConfig config(std::move(*source));
-}
+} // namespace birch::util
 
-} // namespace birch
+#endif

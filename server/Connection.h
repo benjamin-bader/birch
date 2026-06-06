@@ -15,13 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_CONNECTION_H
-#define BIRCH_CONNECTION_H
+#ifndef BIRCH_SERVER_CONNECTION_H
+#define BIRCH_SERVER_CONNECTION_H
 
 #include <chrono>
 #include <cstdint>
 
-namespace birch {
+#include "absl/status/status.h"
+
+#include "server/Message.h"
+
+namespace birch::server {
 
 class IUser;
 class IChannel;
@@ -45,14 +49,49 @@ public:
     virtual uint64_t NumBytesReceived() const noexcept = 0;
 };
 
+class IConnectionObserver;
+
+enum class WriteResult
+{
+    Sent,
+    Backpressure,
+    Closed,
+};
+
 class IConnection
 {
 public:
+    using ConnId = std::uint64_t;
+
     virtual ~IConnection() = default;
 
+    virtual ConnId GetConnId() const = 0;
+
+    // Starts the connection lifecycle
     virtual void OnConnected() = 0;
 
+    virtual WriteResult DeliverResponse(const Message& message) = 0;
 
+    virtual void AddObserver(const std::shared_ptr<IConnectionObserver>& observer) = 0;
+    virtual void RemoveObserver(const std::shared_ptr<IConnectionObserver>& observer) = 0;
+};
+
+/**
+ * An IConnectionObserver is an object that can observe events originating from an IConnection.
+ *
+ * Events:
+ * - Message: A message was received from the connection.
+ * - Error: An error occurred on the connection.
+ * - Disconnect: The connection was disconnected.
+ */
+class IConnectionObserver
+{
+public:
+    virtual ~IConnectionObserver() = default;
+
+    virtual void OnMessage(IConnection::ConnId connId, const Message& message) = 0;
+    virtual void OnError(IConnection::ConnId connId, const absl::Status& status) = 0;
+    virtual void OnDisconnect(IConnection::ConnId connId) = 0;
 };
 
 // An IClientConnection is a connection from a client to this server.
@@ -69,7 +108,6 @@ public:
     virtual ~IServerConnection() = default;
 };
 
+} // namespace birch::server
 
-}
-
-#endif // BIRCH_CONNECTION_H
+#endif // BIRCH_SERVER_CONNECTION_H

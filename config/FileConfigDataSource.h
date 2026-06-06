@@ -20,20 +20,25 @@
 
 #include <filesystem>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
 #include "absl/status/statusor.h"
 
-#include "IConfigSource.h"
+#include "config/IConfigSource.h"
+#include "util/IFileWatcher.h"
+
 
 namespace birch::config {
 
 class FileConfigDataSource : public IConfigDataSource
 {
     std::filesystem::path m_path;
-    std::vector<Callback> m_watchers;
-
+    std::unique_ptr<birch::util::IFileWatcher::IWatchHandle> m_watchHandle;
+    std::mutex m_mutex;
+    std::vector<Callback> m_callbacks;
+    
 public:
     static absl::StatusOr<std::unique_ptr<IConfigDataSource>> CreateFromFile(const std::filesystem::path& path);
 
@@ -44,6 +49,8 @@ public:
     void Subscribe(Callback&& callback) override;
 
 private:
+    absl::Status InitializeFileWatch();
+    
     void OnFileChanged();
 
     void NotifyWatchers();

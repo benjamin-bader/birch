@@ -15,31 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "TomlConfig.h"
-
-#include <filesystem>
+#include "server/Message.h"
 
 #include "gtest/gtest.h"
 
-#include "FileConfigDataSource.h"
+#include "absl/strings/str_format.h"
 
-namespace birch::config {
+namespace birch::server {
 
-TEST(TomlConfigTest, CanCreateFromDataSource)
-{
-    ASSERT_TRUE(util::InitializeGlobalFileWatcher().ok());
 
-    std::filesystem::path dir = testing::TempDir();
-    std::filesystem::path file = dir / "test.toml";
 
-    {
-        std::ofstream os(file);
-        os << "server_name = \"irc.example.com\"";
-    }
-
-    auto source = FileConfigDataSource::CreateFromFile(file);
-    ASSERT_TRUE(source.ok());
-    TomlConfig config(std::move(*source));
-}
-
-} // namespace birch
+} // namespace birch::server

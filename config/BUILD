@@ -26,6 +26,7 @@ cc_library(
     srcs = ["FileConfigDataSource.cc"],
     deps = [
         ":iconfig_source",
+        "//util:file_watcher",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
