@@ -49,8 +49,16 @@ public:
     ) = 0;
 };
 
+// InitializeGlobalFileWatcher attempts creates and starts a globally-available
+// IFileWatcher instance, and returns a status code.
+//
+// On failure, the global file watcher will be initialized to a no-op implementation.
 absl::Status InitializeGlobalFileWatcher();
 
+// Returns the global file-watcher.
+//
+// InitializeGlobalFileWatcher must be called first.  If it hasn't, this function returns
+// nullptr.
 IFileWatcher* GetGlobalFileWatcher();
 
 } // namespace birch::util

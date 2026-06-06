@@ -39,7 +39,7 @@ int main(int argc, char** argv)
   {
     return absl::StrCat("birch ", VERSION); // this will always look like a compiler error in the IDE; bazel provides this as a define.
   };
-  
+
   absl::SetProgramUsageMessage("TODO: Make an IRC server");
   std::vector<char*> positionalArgs = absl::ParseCommandLine(argc, argv);
 
@@ -62,6 +62,22 @@ int main(int argc, char** argv)
     LOG(ERROR) << "Failed to create config";
     return 1;
   }
+
+  auto serverConfig = birch::server::IServerConfig::Create(config);
+  if (!serverConfig.ok())
+  {
+      LOG(ERROR) << "Failed to create server config: " << serverConfig.status();
+      return 1;
+  }
+
+  auto server = birch::server::IServer::Create(*serverConfig);
+  if (server == nullptr)
+  {
+      LOG(ERROR) << "Failed to create server instance";
+      return 1;
+  }
+
+  server->ServeForever();
 
   return 0;
 }

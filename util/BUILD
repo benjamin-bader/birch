@@ -9,6 +9,16 @@ cc_library(
 )
 
 cc_library(
+    name = "noop_file_watcher",
+    hdrs = ["NoopFileWatcher.h"],
+    srcs = ["NoopFileWatcher.cc"],
+    deps = [
+        ":file_watcher_interface",
+        "@abseil-cpp//absl/status:statusor",
+    ],
+)
+
+cc_library(
     name = "inotify_file_watcher",
     srcs = ["InotifyFileWatcher.cc"],
     hdrs = ["InotifyFileWatcher.h"],
@@ -95,7 +105,11 @@ cc_library(
     name = "file_watcher",
     visibility = ["//visibility:public"],
     srcs = ["FileWatcher.cc"],
-    deps = [":file_watcher_interface"] + select({
+    deps = [
+        ":file_watcher_interface",
+        ":noop_file_watcher",
+        "@abseil-cpp//absl/log",
+    ] + select({
         "@platforms//os:linux": [":inotify_file_watcher"],
         "@platforms//os:macos": [":kqueue_file_watcher"],
         "@platforms//os:windows": [":win_file_watcher"],

@@ -21,6 +21,8 @@
 #include <cstdint>
 #include <memory>
 
+#include "absl/status/statusor.h"
+
 #include "config/IConfig.h"
 
 namespace birch::server {
@@ -28,7 +30,7 @@ namespace birch::server {
 class IServerConfig
 {
 public:
-    static std::shared_ptr<IServerConfig> Create(const std::shared_ptr<config::IConfig>& config);
+    static absl::StatusOr<std::shared_ptr<IServerConfig>> Create(const std::shared_ptr<config::IConfig>& config);
 
     virtual ~IServerConfig() = default;
 
@@ -46,8 +48,6 @@ public:
 
     virtual void ServeForever() = 0;
 };
-
-std::unique_ptr<IServer> MakeServer(const IServerConfig& config);
 
 } // namespace birch::server
 
