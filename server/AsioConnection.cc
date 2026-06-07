@@ -113,79 +113,104 @@ void AsioConnection::RemoveObserver(const std::shared_ptr<IConnectionObserver>& 
 
 asio::awaitable<void> AsioConnection::RunReadLoop()
 {
-    try
+    while (true)
     {
-        while (true)
+        auto [ec, length] = co_await m_socket.async_read_some(
+            asio::buffer(m_buffer),
+            asio::as_tuple);
+
+        if (ec == asio::error::eof)
         {
-            std::size_t length = co_await m_socket.async_read_some(
-                asio::buffer(m_buffer),
-                asio::use_awaitable);
+            // Client hung up cleanly; tear the connection down so the write
+            // loop is cancelled and observers are notified of the disconnect.
+            Close();
+            co_return;
+        }
+        else if (ec == asio::error::operation_aborted)
+        {
+            // We're shutting down; bail;
+            Close();
+            co_return;
+        }
+        else if (ec)
+        {
+            LOG(ERROR) << "Error reading from connection: " << ec.message();
+            Close();
+            co_return;
+        }
 
-            auto pos = m_buffer.begin();
-            auto end = pos + length;
+        auto pos = m_buffer.begin();
+        auto end = pos + length;
 
-            while (pos != end)
+        while (pos != end)
+        {
+            auto parseState = m_parser.Parse(m_message, pos, end);
+
+            if (parseState == ParseState::Complete)
             {
-                auto parseState = m_parser.Parse(m_message, pos, end);
+                NotifyMessage(m_message);
 
-                if (parseState == ParseState::Complete)
-                {
-                    NotifyMessage(m_message);
-
-                    m_message = {};
-                    m_parser.Reset();
-                }
-                else if (parseState == ParseState::Invalid)
-                {
-                    LOG(ERROR) << "Invalid message received from client";
-                    break;
-                }
-                else
-                {
-                    // Incomplete message - keep reading
-                    break;
-                }
+                m_message = {};
+                m_parser.Reset();
+            }
+            else if (parseState == ParseState::Invalid)
+            {
+                LOG(ERROR) << "Invalid message received from client";
+                break;
+            }
+            else if (parseState == ParseState::Incomplete)
+            {
+                // Incomplete message - keep reading from the socket.
+                DCHECK(pos == end) << "MessageParser returned ParseState::Incomplete with buffered data remaining";
+                break;
+            }
+            else
+            {
+                LOG(FATAL) << "Unexpected parseState value: " << parseState;
+                co_return;
             }
         }
-    }
-    catch (const std::exception& e)
-    {
-        LOG(ERROR) << "Error in read-loop; connId= " << m_connId << " e=" << e.what();
-        Close();
     }
 }
 
 asio::awaitable<void> AsioConnection::RunWriteLoop()
 {
-    try
+    while (true)
     {
-        while (true)
-        {
-            asio::error_code ec;
-            auto msg = co_await m_writeQueue.async_receive(asio::use_awaitable);
+        auto [ec, msg] = co_await m_writeQueue.async_receive(asio::as_tuple);
 
-            std::size_t cbWrite = m_serializer.WriteToBuffer(m_writeBuffer, msg);
-
-            co_await asio::async_write(m_socket, asio::buffer(m_writeBuffer, cbWrite), asio::use_awaitable);
-        }
-    }
-    catch (std::system_error& e)
-    {
-        if (e.code() == asio::experimental::error::channel_errors::channel_cancelled)
+        if (ec == asio::error::operation_aborted)
         {
-            // Expected, if something closed the channel (read error, or external caller)
             LOG(INFO) << "Write loop shutting down due to connection closure, connId=" << m_connId;
-        }
-        else
-        {
-            LOG(ERROR) << "Exception in write loop; connId=" << m_connId << " e=" << e.what();
             Close();
+            co_return;
         }
-    }
-    catch (std::exception& e)
-    {
-        LOG(ERROR) << "Exception in write-loop; connId=" << m_connId << " e=" << e.what();
-        Close();
+        else if (ec)
+        {
+            LOG(ERROR) << "Error writing to connection: " << ec.message();
+            Close();
+            co_return;
+        }
+
+        std::size_t cbWrite = m_serializer.WriteToBuffer(m_writeBuffer, msg);
+
+        auto [writeEc, cbWritten] = co_await asio::async_write(
+            m_socket,
+            asio::buffer(m_writeBuffer, cbWrite),
+            asio::as_tuple);
+
+        if (writeEc == asio::error::operation_aborted)
+        {
+            LOG(INFO) << "Write loop shutting down due to connection closure, connId=" << m_connId;
+            Close();
+            co_return;
+        }
+        else if (writeEc)
+        {
+            LOG(ERROR) << "Error writing to connection: " << writeEc.message();
+            Close();
+            co_return;
+        }
     }
 }
 
@@ -207,15 +232,15 @@ void AsioConnection::CloseUnderLock()
     m_writeQueue.close();
     m_writeQueue.cancel();
 
-    asio::error_code ec;
-    m_socket.shutdown(asio::socket_base::shutdown_both, ec);
-    if (ec)
+    if (asio::error_code ec; m_socket.shutdown(asio::socket_base::shutdown_both, ec))
     {
-        LOG(ERROR) << "Error shutting down connection: " << ec.message();
+        if (ec != asio::error::not_connected)
+        {
+            LOG(ERROR) << "Error shutting down connection: " << ec.message();
+        }
     }
 
-    m_socket.close(ec);
-    if (ec)
+    if (asio::error_code ec; m_socket.close(ec))
     {
         LOG(ERROR) << "Error closing connection: " << ec.message();
     }

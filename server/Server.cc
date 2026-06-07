@@ -44,12 +44,8 @@ namespace birch::server {
 
 namespace {
 
-#ifndef SIGQUIT
-#define SIGQUIT
-#endif
-
 constexpr const auto kTerminalSignals = std::array {
-    SIGKILL, SIGTERM, SIGQUIT
+    SIGINT, SIGTERM,
 };
 
 constexpr const auto kReloadSignals = std::array {
@@ -77,7 +73,7 @@ std::optional<ServerConfigData> ParseServerConfigFromValue(const config::IValue*
         return std::nullopt;
     }
 
-    auto numWorkersValue = map->Get("num_io_workers");
+    auto numWorkersValue = map->Get("num_workers");
     auto portValue = map->Get("port");
     auto tlsPortValue = map->Get("tls_port");
 
@@ -100,6 +96,8 @@ std::optional<ServerConfigData> ParseServerConfigFromValue(const config::IValue*
         // TODO: make this cast safe
         data.TlsPort = static_cast<std::uint16_t>(tlsPortValue->AsInt64().value_or(0));
     }
+
+    return data;
 }
 
 class ServerConfig : public IServerConfig, public std::enable_shared_from_this<ServerConfig>
@@ -274,6 +272,8 @@ void Server::ServeForever()
     m_acceptor.bind(ep);
     m_acceptor.listen();
 
+    LOG(INFO) << "listening on " << listenPort;
+
     asio::co_spawn(m_strand, [self = shared_from_this()]() -> asio::awaitable<void> {
         co_await self->HandleSignals();
     }, asio::detached);;
@@ -284,10 +284,7 @@ void Server::ServeForever()
 
     for (auto i = 0; i < m_config->GetNumWorkers(); ++i)
     {
-        m_workers.emplace_back([self = shared_from_this()]()
-        {
-            self->m_io.run();
-        });
+        m_workers.emplace_back([this]() { m_io.run(); });
     }
 
     for (auto& worker : m_workers)
@@ -305,6 +302,7 @@ asio::awaitable<void> Server::HandleSignals()
         while (m_draining.load(std::memory_order_relaxed) == false)
         {
             int sig = co_await m_signals.async_wait(asio::use_awaitable);
+            LOG(INFO) << "Received signal number " << sig;
 
             if (std::find(std::begin(kReloadSignals), std::end(kReloadSignals), sig) != kReloadSignals.end())
             {
@@ -315,7 +313,20 @@ asio::awaitable<void> Server::HandleSignals()
 
             if (std::find(std::begin(kTerminalSignals), std::end(kTerminalSignals), sig) != std::end(kTerminalSignals))
             {
+                LOG(INFO) << "Received terminal signal, shutting down server";
+                m_draining.store(true, std::memory_order_relaxed);
                 m_acceptor.close();
+
+                // Actively close every live connection. We must Close() rather
+                // than just clear the map: each connection's read/write loops
+                // hold a shared_ptr to themselves, so erasing the map entry
+                // alone won't run their destructors or cancel their parked
+                // async ops. Close() cancels those ops, unwinding the coroutines
+                // so the io_context can drain and run() can return.
+                for (auto& [connId, conn] : m_connections)
+                {
+                    conn->Close();
+                }
                 break;
             }
 
@@ -344,28 +355,29 @@ asio::awaitable<void> Server::AcceptConnections()
 
     while (!m_draining.load(std::memory_order_relaxed))
     {
-        try
+        auto [ec, socket] = co_await m_acceptor.async_accept(asio::as_tuple);
+        if (ec == asio::error::operation_aborted)
         {
-            auto socket = co_await m_acceptor.async_accept(asio::use_awaitable);
-
-            if (m_draining.load(std::memory_order_relaxed))
-            {
-                LOG(WARNING) << "Server is draining, discarding incoming connection";
-                co_return;
-            }
-
-            auto connId = m_nextConnId.fetch_add(1);
-            auto conn = std::make_shared<AsioConnection>(connId, std::move(socket));
-            m_connections.emplace(connId, conn);
-
-            conn->AddObserver(shared_from_this());
-            conn->OnConnected();
+            // time to die - we've been shut down.
+            break;
         }
-        catch (asio::system_error& e)
+        else if (ec)
         {
-            LOG(ERROR) << "Error accepting connection: " << e.code().message();
-            co_return;
+            LOG(ERROR) << "Error accepting incoming connections: " << ec.message();
+            break;
         }
+        else if (m_draining.load(std::memory_order_relaxed))
+        {
+            // Draining - we don't want new connections.
+            break;
+        }
+
+        auto connId = m_nextConnId.fetch_add(1);
+        auto conn = std::make_shared<AsioConnection>(connId, std::move(socket));
+        m_connections.emplace(connId, conn);
+
+        conn->AddObserver(shared_from_this());
+        conn->OnConnected();
     }
 }
 

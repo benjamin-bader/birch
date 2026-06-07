@@ -71,6 +71,7 @@ public:
     virtual void OnConnected() = 0;
 
     virtual WriteResult DeliverResponse(const Message& message) = 0;
+    virtual void Close() = 0;
 
     virtual void AddObserver(const std::shared_ptr<IConnectionObserver>& observer) = 0;
     virtual void RemoveObserver(const std::shared_ptr<IConnectionObserver>& observer) = 0;

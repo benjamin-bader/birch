@@ -21,6 +21,8 @@
 #include <array>
 #include <string>
 
+#include "absl/strings/str_cat.h"
+
 #include "Message.h"
 
 namespace birch::server {
@@ -31,6 +33,21 @@ enum class ParseState
     Complete,
     Invalid
 };
+
+template <typename Sink>
+void AbslStringify(Sink& sink, ParseState state)
+{
+    switch (state)
+    {
+        case ParseState::Incomplete: sink.Append("ParseState::Incomplete"); break;
+        case ParseState::Complete: sink.Append("ParseState::Complete"); break;
+        case ParseState::Invalid: sink.Append("ParseState::Invalid"); break;
+        default:
+        {
+            sink.Append(absl::StrCat("static_cast<ParseState>(", static_cast<int>(state), ")"));
+        }
+    }
+}
 
 class MessageParser
 {

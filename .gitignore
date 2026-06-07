@@ -3,3 +3,10 @@ bazel-*
 
 # VS Code stuff
 .vscode/
+
+# claude stuff
+.claude/settings.local.json
+
+# clang stuff
+.cache
+compile_commands.json

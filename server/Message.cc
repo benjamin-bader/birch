@@ -93,11 +93,29 @@ std::ostream& operator<<(std::ostream& os, const Message& message)
     os << "prefix=" << message.GetPrefix() << ", ";
     os << "command=" << message.GetCommand() << ", ";
     os << "params=[";
+    bool first = true;
     for (const auto& param : message.GetParams())
     {
-        os << param << ", ";
+        if (!first)
+        {
+            os << ", ";
+        }
+        os << param;
+        first = false;
     }
-    os << "])";
+    os << "], ";
+    os << "tags={";
+    first = true;
+    for (const auto& tag : message.GetTags())
+    {
+        if (!first)
+        {
+            os << ", ";
+        }
+        os << tag.first << "=" << tag.second;
+        first = false;
+    }
+    os << "})";
     return os;
 }
 

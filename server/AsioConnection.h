@@ -64,6 +64,7 @@ public:
 
     void OnConnected() override;
     WriteResult DeliverResponse(const Message& message) override;
+    void Close() override;
 
     void AddObserver(const std::shared_ptr<IConnectionObserver>& observer) override;
     void RemoveObserver(const std::shared_ptr<IConnectionObserver>& observer) override;
@@ -72,7 +73,6 @@ private:
     asio::awaitable<void> RunReadLoop();
     asio::awaitable<void> RunWriteLoop();
 
-    void Close();
     void CloseUnderLock();
 
     void NotifyMessage(const Message& message);
