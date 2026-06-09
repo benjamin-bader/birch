@@ -21,3 +21,10 @@ jobs:
 
       - name: Test
         run: bazelisk test //...
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bazel-testlogs
+          path: bazel-testlogs/**/test.xml
