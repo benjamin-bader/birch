@@ -21,6 +21,7 @@
 #include <fstream>
 
 #include "absl/status/status.h"
+#include "absl/status/status_matchers.h"
 #include "gtest/gtest.h"
 
 #include "util/IFileWatcher.h"
@@ -35,7 +36,7 @@ protected:
     void SetUp() override
     {
         auto status = birch::util::InitializeGlobalFileWatcher();
-        ASSERT_TRUE(status.ok());
+        ABSL_ASSERT_OK(status);
         m_path = std::filesystem::path(testing::TempDir()) / "config.toml";
 
         std::ofstream os(m_path);
@@ -51,7 +52,7 @@ protected:
 TEST_F(FileConfigDataSourceTest, CreateFromFileAcceptsAbsolutePath)
 {
     auto source = FileConfigDataSource::CreateFromFile(std::filesystem::path(m_path));
-    ASSERT_TRUE(source.ok());
+    ABSL_EXPECT_OK(source);
     EXPECT_NE(*source, nullptr);
 }
 
@@ -60,7 +61,7 @@ TEST_F(FileConfigDataSourceTest, ReadReturnsFileContents)
     FileConfigDataSource source(m_path);
     auto contents = source.Read();
 
-    ASSERT_TRUE(contents.ok());
+    ABSL_EXPECT_OK(contents);
     EXPECT_EQ(*contents, "server_name = \"irc.example.com\"\n");
 }
 

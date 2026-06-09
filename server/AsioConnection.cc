@@ -51,6 +51,12 @@ AsioConnection::AsioConnection(ConnId connId, tcp::socket&& socket)
     , m_socket{std::move(socket)}
     , m_strand{asio::make_strand(m_socket.get_executor())}
     , m_writeQueue{m_strand, kWriteQueueDefaultCapacity}
+    , m_message{}
+    , m_parser{}
+    , m_buffer{}
+    , m_serializer{}
+    , m_writeBuffer{}
+    , m_observers{}
 {
 }
 

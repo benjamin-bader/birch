@@ -26,10 +26,13 @@ cc_library(
     name = "message_parser",
     srcs = ["MessageParser.cc"],
     hdrs = ["MessageParser.h"],
+    local_defines = [
+        "WIN32_LEAN_AND_MEAN",
+    ],
     deps = [
-        "message",
+        ":message",
         "@abseil-cpp//absl/strings",
-        "@asio",
+        "@asio//:asio_no_openssl",
     ],
 )
 
@@ -91,7 +94,7 @@ cc_library(
         ":message_serializer",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
-        "@asio",
+        "@asio//:asio_no_openssl",
     ],
 )
 
@@ -152,6 +155,6 @@ cc_library(
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
-        "@asio",
+        "@asio//:asio_no_openssl",
     ],
 )

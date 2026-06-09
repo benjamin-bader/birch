@@ -10,7 +10,7 @@ version_ext = use_extension("//:version.bzl", "version_extension")
 use_repo(version_ext, "birch_version")
 
 bazel_dep(name = "abseil-cpp", version = "20260107.1")
-bazel_dep(name = "asio", version = "1.34.2.bcr.0")
+bazel_dep(name = "asio", version = "1.34.2.bcr.1")
 bazel_dep(name = "aspect_rules_lint", version = "2.5.2")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
 bazel_dep(name = "platforms", version = "1.0.0")
