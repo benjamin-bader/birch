@@ -19,8 +19,8 @@
     "https://bcr.bazel.build/modules/apple_support/1.23.1/MODULE.bazel": "53763fed456a968cf919b3240427cf3a9d5481ec5466abc9d5dc51bc70087442",
     "https://bcr.bazel.build/modules/apple_support/1.24.1/MODULE.bazel": "f46e8ddad60aef170ee92b2f3d00ef66c147ceafea68b6877cb45bd91737f5f8",
     "https://bcr.bazel.build/modules/apple_support/1.24.1/source.json": "cf725267cbacc5f028ef13bb77e7f2c2e0066923a4dab1025e4a0511b1ed258a",
-    "https://bcr.bazel.build/modules/asio/1.34.2.bcr.0/MODULE.bazel": "ada5fbcb526e1595846e6da3799c535f5e3a39122cdc9960a030490b9489e9e9",
-    "https://bcr.bazel.build/modules/asio/1.34.2.bcr.0/source.json": "b909cb39097eaef9dc2f647003957db4b54040e02e7d86888d446157e427065c",
+    "https://bcr.bazel.build/modules/asio/1.34.2.bcr.1/MODULE.bazel": "2f0d982ed23112b0446d5b74ef271bb7f79228261ccc71243d12d9a1baffbdcc",
+    "https://bcr.bazel.build/modules/asio/1.34.2.bcr.1/source.json": "32133cbe6a3cc999a585331ebd14ab79ff5b2ad25c7d048bef382e8fa5b3e19b",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/1.31.2/MODULE.bazel": "7bee702b4862612f29333590f4b658a5832d433d6f8e4395f090e8f4e85d442f",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/1.38.0/MODULE.bazel": "6307fec451ba9962c1c969eb516ebfe1e46528f7fa92e1c9ac8646bef4cdaa3f",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/1.42.2/MODULE.bazel": "2e0d8ab25c57a14f56ace1c8e881b69050417ff91b2fb7718dc00d201f3c3478",
@@ -271,7 +271,7 @@
   "moduleExtensions": {
     "//:version.bzl%version_extension": {
       "general": {
-        "bzlTransitiveDigest": "Vl63gdwoQns5Ha3hdnD6xDw36e/otPYGLPj5+mp1IjM=",
+        "bzlTransitiveDigest": "TCmLkVN3DsixKlOxpcYGTREJZU64gLVjbHlF/hFqPQA=",
         "usagesDigest": "CFO8MEA72LVNcgKPN2Sb/3D30gtOeZDEZGoMlw6xLvo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

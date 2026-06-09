@@ -17,11 +17,10 @@
 
 #include "Server.h"
 
-#include <signal.h>
-
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <csignal>
 #include <memory>
 #include <limits>
 #include <optional>
@@ -35,7 +34,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 
-#include <asio/ssl.hpp>
+#include <asio/awaitable.hpp>
 #include <asio.hpp>
 
 #include "server/AsioConnection.h"
@@ -49,7 +48,13 @@ constexpr const auto kTerminalSignals = std::array {
 };
 
 constexpr const auto kReloadSignals = std::array {
+#if defined(SIGBREAK)
+    SIGBREAK,
+#endif
+
+#if defined(SIGHUP)
     SIGHUP,
+#endif
 };
 
 struct ServerConfigData

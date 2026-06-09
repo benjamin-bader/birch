@@ -6,10 +6,12 @@ build:windows --cxxopt=/std:c++latest
 build:windows --cxxopt=/DUNICODE
 build:windows --cxxopt=/D_UNICODE
 build:windows --cxxopt=/D_WIN32_WINNT=0x0600
+build:windows --cxxopt=/DWIN32_LEAN_AND_MEAN
 build:clang-cl --cxxopt=/std:c++latest # MSVC's clang frontend takes MSVC-style flags
 build:clang-cl --cxxopt=/DUNICODE
 build:clang-cl --cxxopt=/D_UNICODE
 build:clang-cl --cxxopt=/D_WIN32_WINNT=0x0600
+build:clang-cl --cxxopt=/DWIN32_LEAN_AND_MEAN
 
 # This warning is low-value and triggers when adding an asio dependency.
 build:linux --cxxopt=-Wno-unused-local-typedef
