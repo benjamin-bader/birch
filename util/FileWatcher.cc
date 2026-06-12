@@ -33,12 +33,12 @@ namespace {
 
 std::once_flag g_onceFlag;
 std::shared_ptr<IFileWatcher> g_fileWatcher{nullptr};
+absl::Status g_status;
 
 } // namespace
 
 absl::Status InitializeGlobalFileWatcher()
 {
-    static absl::Status status = absl::OkStatus();
     std::call_once(g_onceFlag, [&]() {
         auto maybeFileWatcher = IFileWatcher::Create();
         if (maybeFileWatcher.ok())
@@ -47,13 +47,22 @@ absl::Status InitializeGlobalFileWatcher()
         }
         else
         {
-            status = maybeFileWatcher.status();
+            g_status = maybeFileWatcher.status();
             g_fileWatcher = std::make_shared<NoopFileWatcher>();
-            LOG(ERROR) << "Failed to initialize file-watcher, file change detection disabled!  " << status;
+            LOG(ERROR) << "Failed to initialize file-watcher, file change detection disabled!  " << g_status;
         }
     });
 
-    return status;
+    return g_status;
+}
+
+absl::Status InitializeGlobalFileWatcherForTesting()
+{
+    std::call_once(g_onceFlag, [&]() {
+        g_fileWatcher = std::make_shared<NoopFileWatcher>();
+        g_status = absl::OkStatus();
+    });
+    return g_status;
 }
 
 IFileWatcher* GetGlobalFileWatcher()

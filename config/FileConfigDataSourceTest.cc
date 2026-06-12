@@ -35,7 +35,7 @@ protected:
 
     void SetUp() override
     {
-        auto status = birch::util::InitializeGlobalFileWatcher();
+        auto status = birch::util::InitializeGlobalFileWatcherForTesting();
         ABSL_ASSERT_OK(status);
         m_path = std::filesystem::path(testing::TempDir()) / "config.toml";
 

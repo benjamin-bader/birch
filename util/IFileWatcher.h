@@ -55,6 +55,10 @@ public:
 // On failure, the global file watcher will be initialized to a no-op implementation.
 absl::Status InitializeGlobalFileWatcher();
 
+// InitializeGlobalFileWatcherForTesting creates a no-op IFileWatcher instance and
+// returns an OK status code, if no other file watcher was previously initialized.
+absl::Status InitializeGlobalFileWatcherForTesting();
+
 // Returns the global file-watcher.
 //
 // InitializeGlobalFileWatcher must be called first.  If it hasn't, this function returns
