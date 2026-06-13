@@ -119,7 +119,7 @@ class TomlNode : public IConfigNode
 
 public:
     TomlNode(const ConfigPath& path, std::shared_ptr<TomlValue>&& value);
-    virtual ~TomlNode() = default;
+    ~TomlNode() override = default;
 
     const ConfigPath& GetPath() const override;
     TomlValue* GetValue() override;
@@ -140,8 +140,6 @@ public:
     static std::shared_ptr<TomlConfig> Create(std::unique_ptr<IConfigDataSource>&& source);
 
     TomlConfig(std::unique_ptr<IConfigDataSource>&& source);
-
-    virtual ~TomlConfig();
 
     void Reload() override;
 

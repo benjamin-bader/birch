@@ -52,7 +52,7 @@ TEST_F(TomlConfigTest, CanCreateFromDataSource)
     }
 
     auto source = FileConfigDataSource::CreateFromFile(m_path);
-    ASSERT_TRUE(source.ok());
+    ABSL_ASSERT_OK(source);
     TomlConfig config(std::move(*source));
 }
 

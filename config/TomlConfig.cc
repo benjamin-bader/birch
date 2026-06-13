@@ -340,10 +340,6 @@ TomlConfig::TomlConfig(std::unique_ptr<IConfigDataSource>&& source)
 {
 }
 
-TomlConfig::~TomlConfig()
-{
-}
-
 void TomlConfig::Reload()
 {
     auto contents = m_source->Read();
