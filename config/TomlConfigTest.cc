@@ -19,25 +19,39 @@
 
 #include <filesystem>
 
+#include "absl/status/status_matchers.h"
 #include "gtest/gtest.h"
 
 #include "FileConfigDataSource.h"
 
 namespace birch::config {
 
-TEST(TomlConfigTest, CanCreateFromDataSource)
+class TomlConfigTest : public testing::Test
 {
-    ASSERT_TRUE(util::InitializeGlobalFileWatcher().ok());
+protected:
+    std::filesystem::path m_path;
 
-    std::filesystem::path dir = testing::TempDir();
-    std::filesystem::path file = dir / "test.toml";
-
+    void SetUp() override
     {
-        std::ofstream os(file);
+        auto status = birch::util::InitializeGlobalFileWatcherForTesting();
+        ABSL_ASSERT_OK(status);
+        m_path = std::filesystem::path(testing::TempDir()) / "test.toml";
+    }
+
+    void TearDown() override
+    {
+        std::filesystem::remove(m_path);
+    }
+};
+
+TEST_F(TomlConfigTest, CanCreateFromDataSource)
+{
+    {
+        std::ofstream os(m_path);
         os << "server_name = \"irc.example.com\"";
     }
 
-    auto source = FileConfigDataSource::CreateFromFile(file);
+    auto source = FileConfigDataSource::CreateFromFile(m_path);
     ASSERT_TRUE(source.ok());
     TomlConfig config(std::move(*source));
 }
