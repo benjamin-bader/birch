@@ -15,23 +15,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_MESSAGESERIALIZER_H
-#define BIRCH_SERVER_MESSAGESERIALIZER_H
+#ifndef BIRCH_IRC_NICK_REGISTRY_H
+#define BIRCH_IRC_NICK_REGISTRY_H
 
-#include <cstddef>
-#include <span>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <string_view>
 
-#include "irc/Message.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/status/status.h"
 
-namespace birch::server {
+namespace birch::irc {
 
-class MessageSerializer
+using UserHandle = std::uint64_t;
+
+class NickRegistry
 {
+    absl::flat_hash_map<std::string, UserHandle> m_usersByNick;
+
 public:
-    std::size_t ComputeRequiredSpace(const irc::Message& message);
-    std::size_t WriteToBuffer(std::span<char> buffer, const irc::Message& message);
+    NickRegistry();
+
+    absl::Status ClaimNick(std::string_view nick, UserHandle user);
 };
 
-} // namespace birch::server
+} // namespace birch::irc
 
 #endif

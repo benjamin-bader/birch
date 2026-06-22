@@ -15,23 +15,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_MESSAGESERIALIZER_H
-#define BIRCH_SERVER_MESSAGESERIALIZER_H
+#include "Session.h"
 
-#include <cstddef>
-#include <span>
+namespace birch::irc {
 
-#include "irc/Message.h"
+Session::Session(SessionId id)
+    : m_id{id}
+{}
 
-namespace birch::server {
-
-class MessageSerializer
+SessionId Session::GetId() const
 {
-public:
-    std::size_t ComputeRequiredSpace(const irc::Message& message);
-    std::size_t WriteToBuffer(std::span<char> buffer, const irc::Message& message);
-};
+    return m_id;
+}
 
-} // namespace birch::server
+void Session::AcceptMessage(const Message& message)
+{
+    // TODO
+}
 
-#endif
+void Session::AddSessionObserver(const std::shared_ptr<ISessionObserver>& observer)
+{
+    AddObserver(observer);
+}
+
+void Session::RemoveSessionObserver(const std::shared_ptr<ISessionObserver>& observer)
+{
+    RemoveObserver(observer);
+}
+
+} // namespace birch::irc

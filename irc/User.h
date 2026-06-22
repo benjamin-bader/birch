@@ -15,23 +15,48 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_MESSAGESERIALIZER_H
-#define BIRCH_SERVER_MESSAGESERIALIZER_H
+#ifndef BIRCH_IRC_USER_H
+#define BIRCH_IRC_USER_H
 
-#include <cstddef>
-#include <span>
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
 
-#include "irc/Message.h"
+#include "absl/time/time.h"
 
-namespace birch::server {
+namespace birch::irc {
 
-class MessageSerializer
+using UserId = std::uint64_t;
+
+class User
 {
+    UserId m_id;
+    std::string m_nick;
+    std::string m_origin;
+    int m_mode{0};
+
 public:
-    std::size_t ComputeRequiredSpace(const irc::Message& message);
-    std::size_t WriteToBuffer(std::span<char> buffer, const irc::Message& message);
+    User();
+    User(const User&) = default;
+    User(User&&) = default;
+
+    virtual ~User() = default;
+
+    User& operator=(const User&) = default;
+    User& operator=(User&&) = default;
+
+    UserId GetId() const;
+    const std::string& GetNick() const;
+    const std::string& GetRealname() const;
+
+    int GetMode() const;
+    bool IsOp() const;
+    bool IsInvisible() const;
+
 };
 
-} // namespace birch::server
+} // namespace birch::irc
 
 #endif

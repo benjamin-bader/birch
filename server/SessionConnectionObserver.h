@@ -15,44 +15,42 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_SESSION_H
-#define BIRCH_SERVER_SESSION_H
+#ifndef BIRCH_SERVER_SESSION_CONNECTION_OBSERVER_H
+#define BIRCH_SERVER_SESSION_CONNECTION_OBSERVER_H
 
 #include <memory>
-#include <string>
 
+#include "absl/status/status.h"
+
+#include "irc/Message.h"
+#include "irc/Session.h"
 #include "server/Connection.h"
 
 namespace birch::server {
 
 /**
- * A Session represents a session of a user with the server.
- * It is responsible for mediating between the user's connection to the server,
- * and the server's internal state.
+ * A SessionConnectionObserver adapts a birch::server::IConnection to a Session,
+ * driving the session with the messages and other events produced by the connection.
  */
-class Session
-    : public std::enable_shared_from_this<Session>
-    , public IConnectionObserver
+class SessionConnectionObserver
+    : public IConnectionObserver
+    , public irc::ISessionObserver
 {
-    std::weak_ptr<IConnection> m_connection;
-
-    std::string m_nick;
+    std::shared_ptr<irc::Session> m_session;
+    std::shared_ptr<IConnection> m_connection;
 
 public:
-    Session(std::weak_ptr<IConnection> connection);
-    virtual ~Session() = default;
+    SessionConnectionObserver(const std::shared_ptr<irc::Session>& session, const std::shared_ptr<IConnection>& connection);
 
 public: // IConnectionObserver
-    void OnMessage(IConnection::ConnId connId, const Message& message) override;
+    void OnMessage(IConnection::ConnId connId, const irc::Message& message) override;
     void OnError(IConnection::ConnId connId, const absl::Status& status) override;
     void OnDisconnect(IConnection::ConnId connId) override;
 
-private:
-    void SendResponse(const Message& message);
-
-    void HandlePing(const Message& message);
+public: // ISessionObserver
+    void OnMessageEmitted(const irc::Message& message) override;
 };
 
 } // namespace birch::server
 
-#endif // BIRCH_SERVER_SESSION_H
+#endif // BIRCH_SERVER_SESSION_CONNECTION_OBSERVER_H

@@ -15,23 +15,31 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_MESSAGESERIALIZER_H
-#define BIRCH_SERVER_MESSAGESERIALIZER_H
+#ifndef BIRCH_IRC_ICOMMAND_H
+#define BIRCH_IRC_ICOMMAND_H
 
-#include <cstddef>
-#include <span>
+#include <string>
 
-#include "irc/Message.h"
+#include "absl/status/status.h"
 
-namespace birch::server {
+#include "irc/User.h"
 
-class MessageSerializer
+namespace birch::irc {
+
+class ICommand
 {
 public:
-    std::size_t ComputeRequiredSpace(const irc::Message& message);
-    std::size_t WriteToBuffer(std::span<char> buffer, const irc::Message& message);
+    virtual ~ICommand() = default;
+
+    virtual std::string GetName() = 0;
+
+    virtual absl::Status Execute() = 0;
+
+    // ToString renders the command to text suitable for logging or other diagnostics.
+    // There is no formal command format.
+    virtual std::string ToString() = 0;
 };
 
-} // namespace birch::server
+} // namespace birch::irc
 
 #endif

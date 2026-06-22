@@ -29,30 +29,32 @@
 #include <asio/ip/tcp.hpp>
 #include <asio/strand.hpp>
 
+#include "irc/Message.h"
 #include "server/Connection.h"
-#include "server/Message.h"
 #include "server/MessageParser.h"
 #include "server/MessageSerializer.h"
+#include "util/Observable.h"
 
 namespace birch::server {
 
-class AsioConnection : public IConnection, public std::enable_shared_from_this<AsioConnection>
+class AsioConnection
+    : public IConnection
+    , public std::enable_shared_from_this<AsioConnection>
+    , protected util::Observable<IConnectionObserver>
 {
     using tcp = asio::ip::tcp;
 
     ConnId m_connId;
     tcp::socket m_socket;
     asio::strand<asio::any_io_executor> m_strand;
-    asio::experimental::concurrent_channel<void(asio::error_code, Message)> m_writeQueue;
+    asio::experimental::concurrent_channel<void(asio::error_code, irc::Message)> m_writeQueue;
 
-    Message m_message;
+    irc::Message m_message;
     MessageParser m_parser;
     std::array<char, 4096> m_buffer;
 
     MessageSerializer m_serializer;
     std::array<char, 1024*12> m_writeBuffer;
-
-    std::vector<std::weak_ptr<IConnectionObserver>> m_observers;
 
 public:
     AsioConnection(ConnId connId, tcp::socket&& socket);
@@ -61,7 +63,7 @@ public:
     ConnId GetConnId() const override;
 
     void OnConnected() override;
-    WriteResult DeliverResponse(const Message& message) override;
+    WriteResult DeliverResponse(const irc::Message& message) override;
     void Close() override;
 
     void AddObserver(const std::shared_ptr<IConnectionObserver>& observer) override;
@@ -73,7 +75,7 @@ private:
 
     void CloseUnderLock();
 
-    void NotifyMessage(const Message& message);
+    void NotifyMessage(const irc::Message& message);
     void NotifyError(const absl::Status& status);
     void NotifyDisconnect();
 };

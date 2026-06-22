@@ -23,7 +23,7 @@
 
 #include "absl/strings/str_cat.h"
 
-#include "Message.h"
+#include "irc/Message.h"
 
 namespace birch::server {
 
@@ -53,13 +53,13 @@ class MessageParser
 {
 public:
     template <typename InputIter>
-    ParseState Parse(Message& message, InputIter& begin, InputIter end);
+    ParseState Parse(irc::Message& message, InputIter& begin, InputIter end);
 
     void Reset();
 
 private:
 
-    ParseState Consume(Message& message, char input);
+    ParseState Consume(irc::Message& message, char input);
 
     // Checks m_buffer to see if it contains a valid message prefix.
     bool IsValidPrefix() const noexcept;
@@ -91,7 +91,7 @@ private:
 };
 
 template <typename InputIter>
-ParseState MessageParser::Parse(Message& message, InputIter& iter, InputIter end)
+ParseState MessageParser::Parse(irc::Message& message, InputIter& iter, InputIter end)
 {
     ParseState state = ParseState::Incomplete;
     while (iter != end && state == ParseState::Incomplete)

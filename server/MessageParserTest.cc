@@ -29,7 +29,7 @@ namespace birch::server {
 class ParserTest : public testing::Test
 {
 protected:
-    Message message;
+    irc::Message message;
     MessageParser parser;
     ParseState state;
 

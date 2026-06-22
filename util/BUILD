@@ -115,3 +115,19 @@ cc_library(
         "@platforms//os:windows": [":win_file_watcher"],
     }),
 )
+
+cc_library(
+    name = "observable",
+    hdrs = ["Observable.h"],
+    deps = [],
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "observable_test",
+    srcs = ["ObservableTest.cc"],
+    deps = [
+        ":observable",
+        "//tools:test_main",
+    ],
+)

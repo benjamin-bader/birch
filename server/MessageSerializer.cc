@@ -77,7 +77,7 @@ bool RequiresTrailingMarker(std::string_view param) noexcept
 // The single source of truth for the wire format. Both the measuring and
 // writing paths funnel through here, so they can never drift apart.
 template <typename Sink>
-void SerializeMessage(Sink& sink, const Message& message)
+void SerializeMessage(Sink& sink, const irc::Message& message)
 {
     const auto& tags = message.GetTags();
     if (!tags.empty())
@@ -131,14 +131,14 @@ void SerializeMessage(Sink& sink, const Message& message)
 
 } // namespace
 
-std::size_t MessageSerializer::ComputeRequiredSpace(const Message& message)
+std::size_t MessageSerializer::ComputeRequiredSpace(const irc::Message& message)
 {
     MeasuringSink sink;
     SerializeMessage(sink, message);
     return sink.Size();
 }
 
-std::size_t MessageSerializer::WriteToBuffer(std::span<char> buffer, const Message& message)
+std::size_t MessageSerializer::WriteToBuffer(std::span<char> buffer, const irc::Message& message)
 {
     BufferSink sink{buffer};
     SerializeMessage(sink, message);

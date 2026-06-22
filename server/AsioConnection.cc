@@ -32,16 +32,16 @@ namespace {
 
 constexpr const std::size_t kWriteQueueDefaultCapacity = 5;
 
-void ApplyToObservers(const std::vector<std::weak_ptr<IConnectionObserver>>& observers, std::function<void(const std::shared_ptr<IConnectionObserver>&)> func)
-{
-    for (const auto& observer : observers)
-    {
-        if (auto obs = observer.lock())
-        {
-            func(obs);
-        }
-    }
-}
+// void ApplyToObservers(const std::vector<std::weak_ptr<IConnectionObserver>>& observers, std::function<void(const std::shared_ptr<IConnectionObserver>&)> func)
+// {
+//     for (const auto& observer : observers)
+//     {
+//         if (auto obs = observer.lock())
+//         {
+//             func(obs);
+//         }
+//     }
+// }
 
 } // namespace
 
@@ -55,7 +55,6 @@ AsioConnection::AsioConnection(ConnId connId, tcp::socket&& socket)
     , m_buffer{}
     , m_serializer{}
     , m_writeBuffer{}
-    , m_observers{}
 {
 }
 
@@ -80,7 +79,7 @@ void AsioConnection::OnConnected()
     }, asio::detached);
 }
 
-WriteResult AsioConnection::DeliverResponse(const Message& message)
+WriteResult AsioConnection::DeliverResponse(const irc::Message& message)
 {
     asio::error_code ec;
     if (m_writeQueue.try_send(ec, message))
@@ -102,17 +101,17 @@ WriteResult AsioConnection::DeliverResponse(const Message& message)
 
 void AsioConnection::AddObserver(const std::shared_ptr<IConnectionObserver>& observer)
 {
-    asio::post(m_strand, [self = shared_from_this(), observer]()
+    asio::post(m_strand, [this, self = shared_from_this(), observer]()
     {
-        self->m_observers.emplace_back(observer);
+        Observable::AddObserver(observer);
     });
 }
 
 void AsioConnection::RemoveObserver(const std::shared_ptr<IConnectionObserver>& observer)
 {
-    asio::post(m_strand, [self = shared_from_this(), observer]()
+    asio::post(m_strand, [this, self = shared_from_this(), observer]()
     {
-        self->m_observers.erase(std::remove_if(self->m_observers.begin(), self->m_observers.end(), [observer](const auto& weakObserver) { return weakObserver.expired() || weakObserver.lock() == observer; }), self->m_observers.end());
+        Observable::RemoveObserver(observer);
     });
 }
 
@@ -251,15 +250,13 @@ void AsioConnection::CloseUnderLock()
     }
 
     NotifyDisconnect();
-
-    m_observers.clear();
 }
 
-void AsioConnection::NotifyMessage(const Message& message)
+void AsioConnection::NotifyMessage(const irc::Message& message)
 {
     CHECK(m_strand.running_in_this_thread()) << "NotifyMessage called on wrong thread";
 
-    ApplyToObservers(m_observers, [connId = m_connId, message = message](const std::shared_ptr<IConnectionObserver>& obs)
+    Observable::Notify([connId = m_connId, &message](const auto& obs)
     {
         obs->OnMessage(connId, message);
     });
@@ -269,20 +266,14 @@ void AsioConnection::NotifyError(const absl::Status& status)
 {
     CHECK(m_strand.running_in_this_thread()) << "NotifyError called on wrong thread";
 
-    ApplyToObservers(m_observers, [connId = m_connId, status = status](const std::shared_ptr<IConnectionObserver>& obs)
-    {
-        obs->OnError(connId, status);
-    });
+    Observable::Notify([connId = m_connId, status = status](const auto& obs) { obs->OnError(connId, status); });
 }
 
 void AsioConnection::NotifyDisconnect()
 {
     CHECK(m_strand.running_in_this_thread()) << "NotifyDisconnect called on wrong thread";
 
-    ApplyToObservers(m_observers, [connId = m_connId](const std::shared_ptr<IConnectionObserver>& obs)
-    {
-        obs->OnDisconnect(connId);
-    });
+    Observable::Notify([connId = m_connId](const auto& obs) { obs->OnDisconnect(connId); });
 }
 
 } // namespace birch

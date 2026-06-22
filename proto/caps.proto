@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package birch.proto;
+
+import "google/protobuf/descriptor.proto";
+
+message CapabilitySpec {
+    string label = 1;
+    optional uint32 min_version = 2;
+    repeated string server_values = 3;
+}
+
+extend google.protobuf.EnumValueOptions {
+    optional CapabilitySpec capability_spec = 50000;
+}
+
+enum Capabilities {
+    MULTILINE = 0 [(capability_spec) = { label: "multiline", min_version: 0 }];
+    SASL = 1 [(capability_spec) = { label: "sasl", server_values: ["PLAIN"] }];
+}

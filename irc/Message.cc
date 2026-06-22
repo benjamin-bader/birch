@@ -20,7 +20,7 @@
 #include <iostream>
 #include <utility>
 
-namespace birch::server {
+namespace birch::irc {
 
 MessageBuilder Message::Builder()
 {
@@ -177,4 +177,4 @@ Message MessageBuilder::Build() &&
     return std::move(m_message);
 }
 
-} // namespace birch::server
+} // namespace birch::irc

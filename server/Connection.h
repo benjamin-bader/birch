@@ -23,7 +23,7 @@
 
 #include "absl/status/status.h"
 
-#include "server/Message.h"
+#include "irc/Message.h"
 
 namespace birch::server {
 
@@ -58,6 +58,20 @@ enum class WriteResult
     Closed,
 };
 
+template <typename Sink>
+void AbslStringify(Sink& sink, WriteResult wr)
+{
+    switch (wr)
+    {
+        case WriteResult::Sent: sink.Append("Sent"); break;
+        case WriteResult::Backpressure: sink.Append("Backpressure"); break;
+        case WriteResult::Closed: sink.Append("Closed"); break;
+        default:
+            sink.Append("Unknown");
+            break;
+    }
+}
+
 class IConnection
 {
 public:
@@ -70,7 +84,7 @@ public:
     // Starts the connection lifecycle
     virtual void OnConnected() = 0;
 
-    virtual WriteResult DeliverResponse(const Message& message) = 0;
+    virtual WriteResult DeliverResponse(const irc::Message& message) = 0;
     virtual void Close() = 0;
 
     virtual void AddObserver(const std::shared_ptr<IConnectionObserver>& observer) = 0;
@@ -90,7 +104,7 @@ class IConnectionObserver
 public:
     virtual ~IConnectionObserver() = default;
 
-    virtual void OnMessage(IConnection::ConnId connId, const Message& message) = 0;
+    virtual void OnMessage(IConnection::ConnId connId, const irc::Message& message) = 0;
     virtual void OnError(IConnection::ConnId connId, const absl::Status& status) = 0;
     virtual void OnDisconnect(IConnection::ConnId connId) = 0;
 };

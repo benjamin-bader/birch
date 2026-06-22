@@ -224,7 +224,7 @@ public: // IServer
     void ServeForever() override;
 
 public: // IConnectionObserver
-    void OnMessage(IConnection::ConnId connId, const Message& message) override;
+    void OnMessage(IConnection::ConnId connId, const irc::Message& message) override;
     void OnError(IConnection::ConnId connId, const absl::Status& status) override;
     void OnDisconnect(IConnection::ConnId connId) override;
 
@@ -388,7 +388,7 @@ asio::awaitable<void> Server::AcceptConnections()
 
 // Server::IConnectionObserver implementation
 
-void Server::OnMessage(IConnection::ConnId connId, const Message& message)
+void Server::OnMessage(IConnection::ConnId connId, const irc::Message& message)
 {
 }
 

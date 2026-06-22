@@ -185,7 +185,7 @@ void MessageParser::Reset()
     m_buffer.clear();
 }
 
-ParseState MessageParser::Consume(Message& message, char input)
+ParseState MessageParser::Consume(irc::Message& message, char input)
 {
     #define NEXT(s) do { \
       std::cout << "-> " << #s << std::endl; \

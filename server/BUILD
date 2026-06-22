@@ -16,28 +16,6 @@ cc_library(
 )
 
 cc_library(
-    name = "message",
-    srcs = ["Message.cc"],
-    hdrs = ["Message.h"],
-    deps = [
-        "@abseil-cpp//absl/container:flat_hash_map",
-        "@abseil-cpp//absl/container:linked_hash_map",
-    ],
-)
-
-cc_test(
-    name = "message_test",
-    size = "small",
-    srcs = ["MessageTest.cc"],
-    deps = [
-        ":message",
-        "//tools:test_main",
-        "@abseil-cpp//absl/strings",
-        "@abseil-cpp//absl/strings:str_format",
-    ],
-)
-
-cc_library(
     name = "message_parser",
     srcs = ["MessageParser.cc"],
     hdrs = ["MessageParser.h"],
@@ -46,7 +24,7 @@ cc_library(
     ],
     deps = [
         ":asio_ssl",
-        ":message",
+        "//irc:message",
         "@abseil-cpp//absl/strings",
     ],
 )
@@ -56,7 +34,7 @@ cc_test(
     size = "small",
     srcs = ["MessageParserTest.cc"],
     deps = [
-        "message_parser",
+        ":message_parser",
         "//tools:test_main",
         "@googletest//:gtest",
     ],
@@ -67,7 +45,7 @@ cc_library(
     srcs = ["MessageSerializer.cc"],
     hdrs = ["MessageSerializer.h"],
     deps = [
-        ":message",
+        "//irc:message",
     ],
 )
 
@@ -93,8 +71,9 @@ cc_library(
     srcs = ["Connection.cc"],
     hdrs = ["Connection.h"],
     deps = [
-        ":message",
+        "//irc:message",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/strings",
     ],
 )
 
@@ -105,9 +84,10 @@ cc_library(
     deps = [
         ":asio_ssl",
         ":connection",
-        ":message",
         ":message_parser",
         ":message_serializer",
+        "//irc:message",
+        "//util:observable",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
     ],
@@ -124,27 +104,12 @@ cc_library(
 )
 
 cc_library(
-    name = "session",
-    srcs = ["Session.cc"],
-    hdrs = ["Session.h"],
-    deps = [
-        ":connection",
-        ":message",
-        "@abseil-cpp//absl/log",
-        "@abseil-cpp//absl/log:check",
-        "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings",
-    ],
-)
-
-cc_library(
     name = "dispatcher",
     srcs = ["Dispatcher.cc"],
     hdrs = ["Dispatcher.h"],
     deps = [
         ":connection",
-        ":message",
+        "//irc:message",
         "@abseil-cpp//absl/log",
     ],
 )
@@ -153,6 +118,20 @@ cc_library(
     name = "user",
     srcs = ["User.cc"],
     hdrs = ["User.h"],
+)
+
+cc_library(
+    name = "session_connection_observer",
+    hdrs = ["SessionConnectionObserver.h"],
+    srcs = ["SessionConnectionObserver.cc"],
+    deps = [
+        ":connection",
+        "//irc:session",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/strings",
+    ],
 )
 
 cc_library(

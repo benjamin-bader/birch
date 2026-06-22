@@ -15,37 +15,34 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Session.h"
+#include "IrcState.h"
 
-namespace birch::server {
+#include "absl/strings/str_cat.h"
 
-Session::Session(std::weak_ptr<IConnection> connection)
-    : m_connection{std::move(connection)}
+namespace birch::irc {
+
+IrcState::IrcState()
 {
+
 }
 
-void Session::SendResponse(const Message& message)
+absl::StatusOr<std::shared_ptr<Channel>> IrcState::CreateChannel(const std::string& name)
 {
-    if (auto connection = m_connection.lock())
+    auto it = m_channelsByName.find(name);
+    if (it != m_channelsByName.end())
     {
-        connection->DeliverResponse(message);
-    }
-}
-
-void Session::HandlePing(const Message& message)
-{
-    std::string token;
-    if (message.GetParams().size() > 0)
-    {
-        token = *message.GetParams().rbegin();
+        return absl::AlreadyExistsError(absl::StrCat("Channel ", name, " already exists"));
     }
 
-    Message response = Message::Builder()
-        .WithCommand("PONG")
-        .WithParam("TODO(server info here)")
-        .WithParam(token)
-        .Build();
-    SendResponse(response);
+    auto statusOrChannel = Channel::Create(name);
+    if (!statusOrChannel.ok())
+    {
+        return statusOrChannel.status();
+    }
+
+    m_channelsByName.emplace(name, *statusOrChannel);
+
+    return *statusOrChannel;
 }
 
-} // namespace birch::server
+} // namespace birch::irc

@@ -24,16 +24,16 @@ namespace birch::server {
 class Dispatcher : public IDispatcher
 {
 public:
-    void OnMessage(const IClientConnection& connection, const Message& message) override;
-    void OnMessage(const IServerConnection& connection, const Message& message) override;
+    void OnMessage(const IClientConnection& connection, const irc::Message& message) override;
+    void OnMessage(const IServerConnection& connection, const irc::Message& message) override;
 };
 
-void Dispatcher::OnMessage(const IClientConnection& connection, const Message& message)
+void Dispatcher::OnMessage(const IClientConnection& connection, const irc::Message& message)
 {
     LOG(ERROR) << "Client connection received message: " << message;
 }
 
-void Dispatcher::OnMessage(const IServerConnection& connection, const Message& message)
+void Dispatcher::OnMessage(const IServerConnection& connection, const irc::Message& message)
 {
     LOG(ERROR) << "Server connection received message: " << message;
 }

@@ -15,23 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_MESSAGESERIALIZER_H
-#define BIRCH_SERVER_MESSAGESERIALIZER_H
+#include "Capabilities.h"
 
-#include <cstddef>
-#include <span>
+#include "gtest/gtest.h"
 
-#include "irc/Message.h"
+namespace birch::irc {
 
-namespace birch::server {
-
-class MessageSerializer
+TEST(CapabilitiesTest, Smoke)
 {
-public:
-    std::size_t ComputeRequiredSpace(const irc::Message& message);
-    std::size_t WriteToBuffer(std::span<char> buffer, const irc::Message& message);
-};
+    EXPECT_GE(Capabilities::GetAll().size(), 2) << "We should be able to load capability specs";
+}
 
-} // namespace birch::server
-
-#endif
+} // namespace birch::irc

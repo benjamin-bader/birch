@@ -20,8 +20,8 @@
 
 #include <memory>
 
-#include "Connection.h"
-#include "Message.h"
+#include "irc/Message.h"
+#include "server/Connection.h"
 
 namespace birch::server {
 
@@ -37,8 +37,8 @@ public:
 
     virtual ~IDispatcher() = default;
 
-    virtual void OnMessage(const IClientConnection& connection, const Message& message) = 0;
-    virtual void OnMessage(const IServerConnection& connection, const Message& message) = 0;
+    virtual void OnMessage(const IClientConnection& connection, const irc::Message& message) = 0;
+    virtual void OnMessage(const IServerConnection& connection, const irc::Message& message) = 0;
 };
 
 } // namespace birch::server

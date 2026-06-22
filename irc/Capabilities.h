@@ -15,23 +15,17 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_MESSAGESERIALIZER_H
-#define BIRCH_SERVER_MESSAGESERIALIZER_H
+#ifndef BIRCH_IRC_CAPABILITIES_H
+#define BIRCH_IRC_CAPABILITIES_H
 
-#include <cstddef>
 #include <span>
 
-#include "irc/Message.h"
+#include "proto/caps.pb.h"
 
-namespace birch::server {
+namespace birch::irc::Capabilities {
 
-class MessageSerializer
-{
-public:
-    std::size_t ComputeRequiredSpace(const irc::Message& message);
-    std::size_t WriteToBuffer(std::span<char> buffer, const irc::Message& message);
-};
+std::span<const proto::CapabilitySpec> GetAll();
 
-} // namespace birch::server
+} // namespace birch::irc
 
 #endif

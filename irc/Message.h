@@ -15,8 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BIRCH_SERVER_MESSAGE_H
-#define BIRCH_SERVER_MESSAGE_H
+#ifndef BIRCH_IRC_MESSAGE_H
+#define BIRCH_IRC_MESSAGE_H
 
 #include <iosfwd>
 #include <string>
@@ -24,10 +24,16 @@
 
 #include "absl/container/linked_hash_map.h"
 
-namespace birch::server {
+namespace birch::irc {
 
 class MessageBuilder;
 
+/**
+ * A Message is the base unit of communication in the IRC protocol, and represents
+ * a single line.
+ *
+ * Multi-line commands will be represented as multiple discrete Message instances.
+ */
 class Message
 {
     std::string m_prefix;
@@ -88,6 +94,6 @@ public:
 
 std::ostream& operator<<(std::ostream& os, const Message& message);
 
-} // namespace birch::server
+} // namespace birch::irc
 
 #endif
