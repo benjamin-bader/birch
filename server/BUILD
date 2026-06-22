@@ -1,6 +1,21 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 cc_library(
+    name = "asio_ssl",
+    srcs = ["AsioSsl.cc"],
+    hdrs = ["AsioSsl.h"],
+    defines = [
+        "ASIO_SSL_IS_BORINGSSL",
+        "ASIO_SEPARATE_COMPILATION",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@asio//:asio_no_openssl",
+        "@boringssl//:ssl",
+    ],
+)
+
+cc_library(
     name = "message",
     srcs = ["Message.cc"],
     hdrs = ["Message.h"],
@@ -30,9 +45,9 @@ cc_library(
         "WIN32_LEAN_AND_MEAN",
     ],
     deps = [
+        ":asio_ssl",
         ":message",
         "@abseil-cpp//absl/strings",
-        "@asio//:asio_no_openssl",
     ],
 )
 
@@ -88,13 +103,13 @@ cc_library(
     srcs = ["AsioConnection.cc"],
     hdrs = ["AsioConnection.h"],
     deps = [
+        ":asio_ssl",
         ":connection",
         ":message",
         ":message_parser",
         ":message_serializer",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
-        "@asio//:asio_no_openssl",
     ],
 )
 
@@ -147,6 +162,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":asio_connection",
+        ":asio_ssl",
         ":channel",
         ":connection",
         ":message_parser",
@@ -155,6 +171,5 @@ cc_library(
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
-        "@asio//:asio_no_openssl",
     ],
 )

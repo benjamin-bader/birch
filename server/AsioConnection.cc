@@ -17,7 +17,6 @@
 
 #include "server/AsioConnection.h"
 
-#include <exception>
 #include <future>
 #include <utility>
 
@@ -25,7 +24,7 @@
 #include "absl/log/log.h"
 
 #include <asio.hpp>
-#include <asio/experimental/channel_error.hpp>
+#include <asio/awaitable.hpp>
 
 namespace birch::server {
 

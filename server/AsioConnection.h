@@ -19,8 +19,6 @@
 #define BIRCH_SERVER_ASIOCONNECTION_H
 
 #include <array>
-#include <cstdint>
-#include <functional>
 #include <memory>
 #include <vector>
 
